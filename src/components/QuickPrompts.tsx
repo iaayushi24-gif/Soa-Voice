@@ -3,17 +3,19 @@ import React from 'react';
 interface QuickPromptsProps {
   prompts: string[];
   onSelectPrompt: (prompt: string) => void;
+  language?: 'en' | 'fr';
 }
 
 export const QuickPrompts: React.FC<QuickPromptsProps> = ({
   prompts,
   onSelectPrompt,
+  language = 'en',
 }) => {
   return (
     <div className="space-y-2 pt-1 w-full select-none">
       <div className="flex items-center justify-between">
         <span className="font-space text-[#8f6e78] uppercase tracking-wider text-xs font-semibold">
-          Tap to speak instantly
+          {language === 'fr' ? 'Toucher pour parler instantanément' : 'Tap to speak instantly'}
         </span>
         <span className="text-[#b40065] font-bold text-xs">✦ 🎙️ ✦</span>
       </div>

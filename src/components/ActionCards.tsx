@@ -5,12 +5,14 @@ interface ActionCardsProps {
   actionData: any;
   onSelectAction: (voicePrompt: string) => void;
   onBookSlot?: (slot: AvailableSlot, couponCode?: string) => void;
+  language?: 'en' | 'fr';
 }
 
 export const ActionCards: React.FC<ActionCardsProps> = ({
   actionData,
   onSelectAction,
   onBookSlot,
+  language = 'en',
 }) => {
   if (!actionData) return null;
 
@@ -27,7 +29,7 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
           <div className="flex items-center space-x-1.5">
             <span className="text-[#b40065] text-sm">✦</span>
             <span className="font-syne font-bold text-xs uppercase tracking-wider text-[#b40065]">
-              Previous Set Receipt
+              {language === 'fr' ? 'Reçu du dernier set' : 'Previous Set Receipt'}
             </span>
           </div>
           <span className="bg-[#ffd9e3] text-[#8d004e] font-space text-[10px] px-2 py-0.5 rounded-full font-bold">
@@ -48,19 +50,19 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
               </h4>
               <div className="grid grid-cols-2 gap-1.5 mt-1.5 font-space text-[11px] text-[#5b3f48]">
                 <div>
-                  <span className="text-[#8f6e78]">Tech:</span>{' '}
+                  <span className="text-[#8f6e78]">{language === 'fr' ? 'Artiste :' : 'Tech:'}</span>{' '}
                   <strong className="text-[#1f1a1d]">{data.technician}</strong>
                 </div>
                 <div>
-                  <span className="text-[#8f6e78]">Shape:</span>{' '}
+                  <span className="text-[#8f6e78]">{language === 'fr' ? 'Forme :' : 'Shape:'}</span>{' '}
                   <strong className="text-[#1f1a1d]">{data.shape}</strong>
                 </div>
                 <div>
-                  <span className="text-[#8f6e78]">Paid:</span>{' '}
+                  <span className="text-[#8f6e78]">{language === 'fr' ? 'Payé :' : 'Paid:'}</span>{' '}
                   <strong className="text-[#b40065] font-bold">${data.amountPaid.toFixed(2)}</strong>
                 </div>
                 <div>
-                  <span className="text-[#8f6e78]">Tip:</span>{' '}
+                  <span className="text-[#8f6e78]">{language === 'fr' ? 'Pourboire :' : 'Tip:'}</span>{' '}
                   <strong className="text-[#1f1a1d]">${data.tip.toFixed(2)}</strong>
                 </div>
               </div>
@@ -83,7 +85,7 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
 
         <div className="flex items-center justify-between text-xs bg-[#f3daff]/50 px-3 py-1.5 rounded-xl border border-[#dcacfb]/40">
           <span className="font-space text-[#764d93] font-semibold">
-            ✨ Sparkle Cash Balance:
+            {language === 'fr' ? '✨ Solde Sparkle Cash :' : '✨ Sparkle Cash Balance:'}
           </span>
           <span className="font-syne font-extrabold text-[#764d93]">
             ${sparkleCash.toFixed(2)}
@@ -92,16 +94,16 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
 
         <div className="flex items-center space-x-2 pt-1">
           <button
-            onClick={() => onSelectAction(`Re-book my last set (${data.set})`)}
+            onClick={() => onSelectAction(language === 'fr' ? `Reprendre mon dernier set (${data.set})` : `Re-book my last set (${data.set})`)}
             className="flex-1 bg-gradient-to-r from-[#b40065] to-[#e10080] text-white py-2 px-3 rounded-full font-space text-xs font-bold shadow-sm active:scale-95 transition-transform cursor-pointer text-center"
           >
-            ✦ Re-book This Set
+            {language === 'fr' ? '✦ Reprendre ce set' : '✦ Re-book This Set'}
           </button>
           <button
-            onClick={() => onSelectAction('Book a refill for my last set')}
+            onClick={() => onSelectAction(language === 'fr' ? 'Réserver un remplissage pour mon dernier set' : 'Book a refill for my last set')}
             className="bg-white border border-[#b40065]/40 text-[#b40065] py-2 px-3 rounded-full font-space text-xs font-semibold hover:bg-[#ffd9e3]/30 active:scale-95 transition-transform cursor-pointer"
           >
-            Refill ($95)
+            {language === 'fr' ? 'Remplissage ($95)' : 'Refill ($95)'}
           </button>
         </div>
       </div>
@@ -119,11 +121,11 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
           <div className="flex items-center space-x-1.5">
             <span className="text-[#b40065] text-sm">🎟️</span>
             <span className="font-syne font-bold text-xs uppercase tracking-wider text-[#b40065]">
-              VIP Discounts & Sparkle Cash
+              {language === 'fr' ? 'Coupons VIP & Sparkle Cash' : 'VIP Discounts & Sparkle Cash'}
             </span>
           </div>
           <span className="bg-[#dcacfb] text-[#2e014b] font-space text-[10px] px-2 py-0.5 rounded-full font-bold">
-            ${sparkleCash.toFixed(2)} Available
+            ${sparkleCash.toFixed(2)} {language === 'fr' ? 'Disponibles' : 'Available'}
           </span>
         </div>
 
@@ -146,14 +148,14 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
                   {c.description}
                 </p>
                 <span className="font-space text-[10px] text-[#8f6e78]">
-                  Expires: {c.expires}
+                  {language === 'fr' ? 'Expire le :' : 'Expires:'} {c.expires}
                 </span>
               </div>
               <button
-                onClick={() => onSelectAction(`Book an appointment with coupon ${c.code}`)}
+                onClick={() => onSelectAction(language === 'fr' ? `Réserver avec le coupon ${c.code}` : `Book an appointment with coupon ${c.code}`)}
                 className="ml-2 bg-gradient-to-r from-[#b40065] to-[#764d93] text-white px-3 py-1.5 rounded-full font-space text-[11px] font-bold active:scale-95 transition-transform cursor-pointer shrink-0"
               >
-                Apply
+                {language === 'fr' ? 'Appliquer' : 'Apply'}
               </button>
             </div>
           ))}
@@ -172,11 +174,11 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
           <div className="flex items-center space-x-1.5">
             <span className="text-[#b40065] text-sm">📅</span>
             <span className="font-syne font-bold text-xs uppercase tracking-wider text-[#b40065]">
-              Real-Time Available Slots
+              {language === 'fr' ? 'Créneaux en temps réel' : 'Real-Time Available Slots'}
             </span>
           </div>
           <span className="bg-[#79f5fb] text-[#002021] font-space text-[10px] px-2 py-0.5 rounded-full font-bold">
-            Live Booking
+            {language === 'fr' ? 'Réservation Directe' : 'Live Booking'}
           </span>
         </div>
 
@@ -196,7 +198,7 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
                   </span>
                 </div>
                 <div className="font-jakarta text-[11px] text-[#5b3f48] flex items-center space-x-2 mt-0.5">
-                  <span>Artist: <strong>{s.artist}</strong></span>
+                  <span>{language === 'fr' ? 'Artiste :' : 'Artist:'} <strong>{s.artist}</strong></span>
                   <span>•</span>
                   <span className="text-[#764d93]">{s.serviceAvailable}</span>
                 </div>
@@ -206,12 +208,12 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
                   if (onBookSlot) {
                     onBookSlot(s, 'BARBIE20');
                   } else {
-                    onSelectAction(`Book ${s.date} at ${s.time} with ${s.artist}`);
+                    onSelectAction(language === 'fr' ? `Réserver le ${s.date} à ${s.time} avec ${s.artist}` : `Book ${s.date} at ${s.time} with ${s.artist}`);
                   }
                 }}
                 className="bg-[#b40065] text-white px-3 py-1.5 rounded-full font-space text-[11px] font-bold hover:bg-[#e10080] active:scale-95 transition-transform cursor-pointer"
               >
-                Book
+                {language === 'fr' ? 'Réserver' : 'Book'}
               </button>
             </div>
           ))}
@@ -230,11 +232,11 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
           <div className="flex items-center space-x-1.5">
             <span className="text-[#b40065] text-sm">👑</span>
             <span className="font-syne font-bold text-xs uppercase tracking-wider text-[#b40065]">
-              Limited Edition Atelier Drops
+              {language === 'fr' ? 'Drops Atelier en Édition Limitée' : 'Limited Edition Atelier Drops'}
             </span>
           </div>
           <span className="bg-[#b40065] text-white font-space text-[10px] px-2 py-0.5 rounded-full font-bold">
-            Rare Drops
+            {language === 'fr' ? 'Éditions Rares' : 'Rare Drops'}
           </span>
         </div>
 
@@ -276,7 +278,7 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
                       ${item.price}
                     </span>
                     <div className="font-space text-[9px] text-[#764d93] font-bold">
-                      {item.remainingSlots} SLOTS
+                      {item.remainingSlots} {language === 'fr' ? 'RESTANTS' : 'SLOTS'}
                     </div>
                   </div>
                 </div>
@@ -294,10 +296,10 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
                   ))}
                 </div>
                 <button
-                  onClick={() => onSelectAction(`Book the ${item.title} limited edition set`)}
+                  onClick={() => onSelectAction(language === 'fr' ? `Réserver le drop édition limitée ${item.title}` : `Book the ${item.title} limited edition set`)}
                   className="bg-gradient-to-r from-[#b40065] to-[#764d93] text-white px-3 py-1 rounded-full font-space text-[10px] font-bold active:scale-95 transition-transform cursor-pointer"
                 >
-                  Claim Slot
+                  {language === 'fr' ? 'Réserver' : 'Claim Slot'}
                 </button>
               </div>
             </div>
@@ -320,24 +322,24 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
           <div className="flex items-center space-x-1.5">
             <span className="text-[#b40065] text-sm">💅</span>
             <span className="font-syne font-bold text-xs uppercase tracking-wider text-[#b40065]">
-              Y2K Trending Inspiration Board
+              {language === 'fr' ? 'Moodboard des Tendances Y2K' : 'Y2K Trending Inspiration Board'}
             </span>
           </div>
           <span className="bg-[#dcacfb] text-[#2e014b] font-space text-[10px] px-2 py-0.5 rounded-full font-bold">
-            Studio Moodboard
+            {language === 'fr' ? 'Inspirations Studio' : 'Studio Moodboard'}
           </span>
         </div>
 
         {/* Trending Shapes */}
         <div>
           <span className="font-space text-[10px] uppercase font-bold text-[#8f6e78] tracking-wider">
-            Trending Shapes
+            {language === 'fr' ? 'Formes tendances' : 'Trending Shapes'}
           </span>
           <div className="flex flex-wrap gap-1.5 mt-1">
             {shapes.map((s: any, idx: number) => (
               <button
                 key={idx}
-                onClick={() => onSelectAction(`Tell me more about ${s.name} nail ideas`)}
+                onClick={() => onSelectAction(language === 'fr' ? `Dis-m'en plus sur les ongles de forme ${s.name}` : `Tell me more about ${s.name} nail ideas`)}
                 className="bg-white border border-[#ffd9e3] hover:border-[#b40065] px-2.5 py-1 rounded-full font-space text-xs text-[#1f1a1d] active:scale-95 transition-all flex items-center space-x-1 cursor-pointer"
               >
                 <span>✦</span>
@@ -351,13 +353,13 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
         {/* Color Combos Swatch Palette */}
         <div>
           <span className="font-space text-[10px] uppercase font-bold text-[#8f6e78] tracking-wider">
-            Curated Color Swatches
+            {language === 'fr' ? 'Palettes de couleurs tendances' : 'Curated Color Swatches'}
           </span>
           <div className="grid grid-cols-2 gap-2 mt-1">
             {palettes.map((p: any, idx: number) => (
               <div
                 key={idx}
-                onClick={() => onSelectAction(`Can I get the ${p.name} color palette on my next set?`)}
+                onClick={() => onSelectAction(language === 'fr' ? `Est-ce que je peux avoir la palette ${p.name} sur mon prochain set ?` : `Can I get the ${p.name} color palette on my next set?`)}
                 className="bg-white p-2 rounded-xl border border-[#e3bdc7] hover:border-[#b40065] cursor-pointer transition-all"
               >
                 <div className="flex space-x-1 mb-1">
@@ -383,7 +385,7 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
         {/* Finishes */}
         <div>
           <span className="font-space text-[10px] uppercase font-bold text-[#8f6e78] tracking-wider">
-            Trending Finishes
+            {language === 'fr' ? 'Finitions & Breloques' : 'Trending Finishes'}
           </span>
           <div className="flex flex-wrap gap-1 mt-1">
             {finishes.slice(0, 4).map((f: string, idx: number) => (

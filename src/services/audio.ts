@@ -1,15 +1,17 @@
 /**
  * Audio synthesis & sound effects for Soa Voice (NailsbySoa)
- * Replicates the exact synthesized sound effects from nailsbysoa.netlify.app:
- * - Dual-oscillator Y2K disc startup synth chord
- * - Retro 8-bit bouncing corner blip
- * - Sparkle chimes and speech synthesis
+ * Supports:
+ * - AI Stitch Character Voice via Gemini TTS ('Puck' voice model with steady, normal pace)
+ * - Browser SpeechSynthesis fallback with Stitch-like pitch (1.25) and steady normal pace (0.95)
+ * - Startup synth noise and 8-bit blip sounds
  */
 
 class AudioService {
   private ctx: AudioContext | null = null;
   private currentUtterance: SpeechSynthesisUtterance | null = null;
+  private currentAudioElement: HTMLAudioElement | null = null;
   private selectedVoice: SpeechSynthesisVoice | null = null;
+  private watchdogTimer: any = null;
 
   constructor() {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -37,15 +39,17 @@ class AudioService {
   private initVoice() {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
     const voices = window.speechSynthesis.getVoices();
+    // Soft, cool, friendly female voice
     const preferred = voices.find(
       (v) =>
         (v.name.includes('Samantha') ||
-          v.name.includes('Karen') ||
           v.name.includes('Victoria') ||
+          v.name.includes('Karen') ||
           v.name.includes('Google US English') ||
+          v.name.includes('Ava') ||
+          v.name.includes('Moira') ||
           v.name.includes('Zira') ||
-          v.name.includes('Fiona') ||
-          v.name.includes('Serena')) &&
+          v.name.toLowerCase().includes('female')) &&
         v.lang.startsWith('en')
     );
     this.selectedVoice = preferred || voices.find((v) => v.lang.startsWith('en')) || voices[0] || null;
@@ -91,8 +95,7 @@ class AudioService {
   }
 
   /**
-   * Exact Bouncing Blip Sound from nailsbysoa.netlify.app:
-   * Short frequency sweep on screen border hits
+   * Exact Bouncing Blip Sound from nailsbysoa.netlify.app
    */
   playBouncingBlip(freq = 520) {
     try {
@@ -117,13 +120,12 @@ class AudioService {
     } catch (e) {}
   }
 
-  // Play sparkling Y2K cyber chime
   playSparkleChime() {
     try {
       const ctx = this.getAudioContext();
       if (!ctx) return;
       const now = ctx.currentTime;
-      const notes = [1046.5, 1318.5, 1567.98, 2093.0]; // C6, E6, G6, C7
+      const notes = [1046.5, 1318.5, 1567.98, 2093.0];
       notes.forEach((freq, idx) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -144,7 +146,6 @@ class AudioService {
     } catch (e) {}
   }
 
-  // Play subtle mic listening ping
   playMicStart() {
     try {
       const ctx = this.getAudioContext();
@@ -168,13 +169,12 @@ class AudioService {
     } catch (e) {}
   }
 
-  // Play confirmed booking fanfare
   playSuccessSound() {
     try {
       const ctx = this.getAudioContext();
       if (!ctx) return;
       const now = ctx.currentTime;
-      const notes = [784, 987.77, 1174.66, 1567.98]; // G5, B5, D6, G6
+      const notes = [784, 987.77, 1174.66, 1567.98];
       notes.forEach((freq, idx) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -194,67 +194,163 @@ class AudioService {
     } catch (e) {}
   }
 
-  // Speak text with Y2K Barbie personality
-  speak(
+  /**
+   * Speaks the concise voice line using AI Stitch character voice
+   * - Steady, normal pace (not rushed)
+   * - Never reads paragraphs
+   * - Prioritizes high-quality Gemini TTS 'Puck' model with fallback to tuned SpeechSynthesis
+   */
+  async speak(
     text: string,
     options?: {
       onStart?: () => void;
       onEnd?: () => void;
       onError?: () => void;
-    }
+    },
+    language: 'en' | 'fr' = 'en'
   ) {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+    this.stopSpeaking();
+
+    // Clean text of symbols
+    const cleanText = text
+      .replace(/[*#•✦💅✨💎👑🎟️📅🍀]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (!cleanText) {
       options?.onEnd?.();
       return;
     }
 
-    this.stopSpeaking();
-
-    const cleanText = text
-      .replace(/\*\*/g, '')
-      .replace(/\*/g, '')
-      .replace(/#/g, '')
-      .replace(/•/g, '')
-      .replace(/✦/g, '')
-      .replace(/💅/g, '')
-      .replace(/✨/g, '');
-
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    if (this.selectedVoice) {
-      utterance.voice = this.selectedVoice;
-    }
-    utterance.rate = 1.05;
-    utterance.pitch = 1.15;
-    utterance.volume = 1.0;
-
-    utterance.onstart = () => {
-      this.playSparkleChime();
-      options?.onStart?.();
-    };
-
-    utterance.onend = () => {
+    let hasEnded = false;
+    const finish = () => {
+      if (hasEnded) return;
+      hasEnded = true;
+      if (this.watchdogTimer) {
+        clearTimeout(this.watchdogTimer);
+        this.watchdogTimer = null;
+      }
       this.currentUtterance = null;
+      this.currentAudioElement = null;
       options?.onEnd?.();
     };
 
-    utterance.onerror = (e) => {
-      console.warn('Speech synthesis error/interrupted', e);
-      this.currentUtterance = null;
-      options?.onError?.();
-    };
+    // Try backend AI Stitch TTS (Gemini 'Puck' voice)
+    try {
+      const res = await fetch('/api/voice/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: cleanText, language }),
+      });
 
-    this.currentUtterance = utterance;
-    window.speechSynthesis.speak(utterance);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.audioUrl) {
+          options?.onStart?.();
+          const audio = new Audio(data.audioUrl);
+          audio.playbackRate = 1.0; // Steady, normal pace
+
+          audio.onended = () => {
+            finish();
+          };
+
+          audio.onerror = () => {
+            finish();
+          };
+
+          this.currentAudioElement = audio;
+          await audio.play();
+
+          // Safety watchdog
+          this.watchdogTimer = setTimeout(() => {
+            finish();
+          }, 15000);
+
+          return;
+        }
+      }
+    } catch (e) {
+      // Fall through to browser speech synthesis
+    }
+
+    // Fallback: Browser SpeechSynthesis with Stitch voice parameters
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.lang = language === 'fr' ? 'fr-FR' : 'en-US';
+
+      const voices = window.speechSynthesis.getVoices();
+      if (language === 'fr') {
+        const frVoice = voices.find(
+          (v) =>
+            v.name.includes('Amelie') ||
+            v.name.includes('Google français') ||
+            v.name.includes('Hortense') ||
+            v.name.includes('Julie') ||
+            v.name.toLowerCase().includes('female') ||
+            v.lang.startsWith('fr')
+        );
+        if (frVoice) {
+          utterance.voice = frVoice;
+        }
+      } else if (this.selectedVoice) {
+        utterance.voice = this.selectedVoice;
+      }
+
+      // Soft, friendly, natural female pace and pitch:
+      utterance.rate = 0.98; // Steady, calm, warm pace
+      utterance.pitch = 1.12; // Gentle, soft female pitch
+      utterance.volume = 1.0;
+
+      utterance.onstart = () => {
+        options?.onStart?.();
+      };
+
+      utterance.onend = () => {
+        finish();
+      };
+
+      utterance.onerror = () => {
+        finish();
+      };
+
+      // Watchdog timeout to guarantee completion
+      const maxDurationMs = Math.max(2500, (cleanText.length / 9) * 1000 + 1500);
+      this.watchdogTimer = setTimeout(() => {
+        this.stopSpeaking();
+        finish();
+      }, maxDurationMs);
+
+      this.currentUtterance = utterance;
+      window.speechSynthesis.speak(utterance);
+    } else {
+      finish();
+    }
   }
 
   stopSpeaking() {
+    if (this.currentAudioElement) {
+      try {
+        this.currentAudioElement.pause();
+        this.currentAudioElement.currentTime = 0;
+      } catch (e) {}
+      this.currentAudioElement = null;
+    }
+
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
+      try {
+        window.speechSynthesis.cancel();
+      } catch (e) {}
       this.currentUtterance = null;
+    }
+
+    if (this.watchdogTimer) {
+      clearTimeout(this.watchdogTimer);
+      this.watchdogTimer = null;
     }
   }
 
   isSpeaking(): boolean {
+    if (this.currentAudioElement && !this.currentAudioElement.paused) return true;
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return false;
     return window.speechSynthesis.speaking;
   }

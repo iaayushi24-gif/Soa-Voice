@@ -21,11 +21,12 @@ export default function App() {
     {
       id: 'msg-init-soa',
       sender: 'soa',
-      text: 'Last Friday you got the **3D Cyber Chrome Stiletto set** with Naomi ($165). You have **$34.50 in Sparkle Cash** & code **BARBIE20** active! Want me to book your refill or suggest trending jelly aura ideas?',
+      text:
+        'Hey babe! Last Friday you got the **3D Cyber Chrome Stiletto set** with Naomi ($165). You have **$34.50 in Sparkle Cash** & code **BARBIE20** active! Want me to book your refill or suggest trending jelly aura ideas, babe?',
       spokenText:
-        'Last Friday you got the 3D Cyber Chrome Stiletto set with Naomi for $165. You have $34.50 in Sparkle Cash & code BARBIE20 active! Want me to book your refill or suggest trending jelly aura ideas?',
+        'Hey babe! Your last set was 3D Cyber Chrome with Naomi for 165 dollars. You got 34 dollars in Sparkle Cash!',
       timestamp: 'Just now',
-      durationSeconds: 11,
+      durationSeconds: 5,
       intent: 'past_appointments',
       actionData: {
         type: 'past_set',
@@ -48,20 +49,33 @@ export default function App() {
     },
   ]);
 
+  const [language, setLanguage] = useState<'en' | 'fr'>('en');
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isHandsFreeEnabled, setIsHandsFreeEnabled] = useState(true);
   const [interimTranscript, setInterimTranscript] = useState('');
   const [clientProfile, setClientProfile] = useState<ClientProfile | null>(null);
-  const [suggestedPrompts, setSuggestedPrompts] = useState<string[]>([
+
+  const EN_PROMPTS = [
     'Re-book my last set',
     'What coupons do I have?',
     'Trending cyber chrome',
     'Limited edition drops?',
     'Check availability today',
     'Need design inspiration',
-  ]);
+  ];
+
+  const FR_PROMPTS = [
+    'Reprendre mon dernier set',
+    'Quels sont mes coupons ?',
+    'Tendances cyber chrome',
+    'Drops édition limitée',
+    'Créneaux disponibles',
+    'Idées de nail art',
+  ];
+
+  const [suggestedPrompts, setSuggestedPrompts] = useState<string[]>(EN_PROMPTS);
 
   const recognitionRef = useRef<any>(null);
   const transcriptBufferRef = useRef<string>('');
@@ -86,7 +100,16 @@ export default function App() {
     }
   }, [messages, isProcessing, view]);
 
-  // Setup Web Speech Recognition
+  const isSpeakingRef = useRef(false);
+  const isProcessingRef = useRef(false);
+  const isHandsFreeRef = useRef(true);
+
+  // Sync ref with state
+  useEffect(() => {
+    isHandsFreeRef.current = isHandsFreeEnabled;
+  }, [isHandsFreeEnabled]);
+
+  // Setup Web Speech Recognition with strict echo isolation
   useEffect(() => {
     if (typeof window !== 'undefined' && view === 'studio') {
       const SpeechRecognition =
@@ -97,21 +120,27 @@ export default function App() {
         const recognition = new SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = true;
-        recognition.lang = 'en-US';
+        recognition.lang = language === 'fr' ? 'fr-FR' : 'en-US';
 
         recognition.onstart = () => {
           setIsListening(true);
         };
 
         recognition.onresult = (event: any) => {
+          // STRICT ECHO PREVENTION: Discard all audio if Soa is speaking, thinking, or in cooldown
+          if (isSpeakingRef.current || isProcessingRef.current) {
+            return;
+          }
+
           let currentInterim = '';
           for (let i = event.resultIndex; i < event.results.length; ++i) {
             const transcript = event.results[i][0].transcript;
             if (event.results[i].isFinal) {
               transcriptBufferRef.current += ' ' + transcript;
-              handleFinalSpeech(transcriptBufferRef.current.trim());
+              const text = transcriptBufferRef.current.trim();
               transcriptBufferRef.current = '';
               currentInterim = '';
+              handleFinalSpeech(text);
             } else {
               currentInterim += transcript;
             }
@@ -120,14 +149,19 @@ export default function App() {
         };
 
         recognition.onerror = (event: any) => {
-          console.warn('Speech recognition error:', event.error);
           if (event.error === 'not-allowed') {
             setIsListening(false);
           }
         };
 
         recognition.onend = () => {
-          if (isHandsFreeEnabled && !isSpeaking && !isProcessing && view === 'studio') {
+          // Only auto-restart if hands-free is enabled AND Soa is totally quiet
+          if (
+            isHandsFreeRef.current &&
+            !isSpeakingRef.current &&
+            !isProcessingRef.current &&
+            view === 'studio'
+          ) {
             try {
               recognition.start();
             } catch (e) {
@@ -145,20 +179,78 @@ export default function App() {
     return () => {
       if (recognitionRef.current) {
         try {
-          recognitionRef.current.stop();
+          recognitionRef.current.abort();
         } catch (e) {}
       }
     };
-  }, [isHandsFreeEnabled, isSpeaking, isProcessing, view]);
+  }, [view, language]);
+
+  const toggleLanguage = (newLang: 'en' | 'fr') => {
+    setLanguage(newLang);
+    if (recognitionRef.current) {
+      recognitionRef.current.lang = newLang === 'fr' ? 'fr-FR' : 'en-US';
+    }
+    setSuggestedPrompts(newLang === 'fr' ? FR_PROMPTS : EN_PROMPTS);
+
+    // Announce the language switch cleanly with Stitch voice
+    const switchMsg: VoiceMessage = {
+      id: `soa-lang-${Date.now()}`,
+      sender: 'soa',
+      text:
+        newLang === 'fr'
+          ? 'Mode Français activé 🇫🇷 ! Demande-moi tes anciens sets, tes promos ou réserve un rendez-vous !'
+          : 'English mode activated 🇺🇸! Ask me about your past sets, coupons, or book an appointment!',
+      spokenText:
+        newLang === 'fr'
+          ? 'Mode Français activé ! Que puis-je faire pour toi ?'
+          : 'English mode activated! What can I do for you?',
+      timestamp: 'Just now',
+      durationSeconds: 4,
+    };
+    setMessages((prev) => [...prev, switchMsg]);
+
+    isSpeakingRef.current = true;
+    setIsSpeaking(true);
+    audioService.speak(
+      switchMsg.spokenText!,
+      {
+        onEnd: () => {
+          isSpeakingRef.current = false;
+          setIsSpeaking(false);
+          setTimeout(() => {
+            if (
+              isHandsFreeRef.current &&
+              !isSpeakingRef.current &&
+              !isProcessingRef.current &&
+              recognitionRef.current
+            ) {
+              try {
+                recognitionRef.current.start();
+              } catch (e) {}
+            }
+          }, 1400);
+        },
+        onError: () => {
+          isSpeakingRef.current = false;
+          setIsSpeaking(false);
+        },
+      },
+      newLang
+    );
+  };
 
   const handleFinalSpeech = (rawText: string) => {
+    // If speaking or processing, drop speech completely
+    if (isSpeakingRef.current || isProcessingRef.current) {
+      return;
+    }
     let clean = rawText.trim();
-    if (!clean) return;
+    if (!clean || clean.length < 3) return;
 
     if (clean.toLowerCase().includes('hey soa') || clean.toLowerCase().includes('soa')) {
       clean = clean.replace(/hey soa/gi, '').replace(/soa/gi, '').trim();
       if (!clean) {
-        sendVoiceQuery('Hello! What can you help me with today?');
+        sendVoiceQuery(language === 'fr' ? 'Bonjour ! Comment peux-tu m\'aider aujourd\'hui ?' : 'Hello! What can you help me with today?');
         return;
       }
     }
@@ -167,14 +259,22 @@ export default function App() {
   };
 
   const toggleMic = () => {
+    // If Soa is speaking, tapping immediately stops her!
+    if (isSpeaking || isSpeakingRef.current) {
+      audioService.stopSpeaking();
+      setIsSpeaking(false);
+      isSpeakingRef.current = false;
+      return;
+    }
+
     if (!recognitionRef.current) {
-      alert('Speech Recognition is not supported on this browser. You can use the keyboard input or one-tap chips!');
+      alert(language === 'fr' ? 'La reconnaissance vocale n\'est pas supportée sur ce navigateur.' : 'Speech Recognition is not supported on this browser. You can use keyboard input!');
       return;
     }
 
     if (isListening) {
       try {
-        recognitionRef.current.stop();
+        recognitionRef.current.abort();
       } catch (e) {}
       setIsListening(false);
     } else {
@@ -191,15 +291,20 @@ export default function App() {
   const sendVoiceQuery = async (queryText: string) => {
     if (!queryText.trim()) return;
 
-    if (recognitionRef.current && isListening) {
+    // 1. Immediately silence any active speech
+    audioService.stopSpeaking();
+    setIsSpeaking(false);
+    isSpeakingRef.current = false;
+
+    // 2. Immediately stop recognition so microphone doesn't pick up audio
+    isProcessingRef.current = true;
+    setIsProcessing(true);
+    if (recognitionRef.current) {
       try {
-        recognitionRef.current.stop();
+        recognitionRef.current.abort();
       } catch (e) {}
       setIsListening(false);
     }
-
-    audioService.stopSpeaking();
-    setIsSpeaking(false);
 
     const userMsg: VoiceMessage = {
       id: `user-${Date.now()}`,
@@ -208,61 +313,81 @@ export default function App() {
       timestamp: 'Just now',
     };
     setMessages((prev) => [...prev, userMsg]);
-    setIsProcessing(true);
 
     try {
       const res = await fetch('/api/voice/process', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: queryText }),
+        body: JSON.stringify({ prompt: queryText, language }),
       });
 
       const data = await res.json();
+      isProcessingRef.current = false;
+      setIsProcessing(false);
 
       const soaMsg: VoiceMessage = {
         id: `soa-${Date.now()}`,
         sender: 'soa',
-        text: data.displayText || data.spokenText || "I'm on it, babe!",
+        text: data.displayText || data.spokenText || (language === 'fr' ? "Je m'en occupe, beauté !" : "I'm on it, babe!"),
         spokenText: data.spokenText || data.displayText,
         timestamp: 'Just now',
-        durationSeconds: Math.max(6, Math.min(18, Math.round((data.spokenText?.length || 50) / 14))),
+        durationSeconds: Math.max(4, Math.min(12, Math.round((data.spokenText?.length || 40) / 14))),
         intent: data.intent,
         actionData: data.actionData,
       };
 
       setMessages((prev) => [...prev, soaMsg]);
-      setIsProcessing(false);
 
       if (data.suggestedQuickPrompts && Array.isArray(data.suggestedQuickPrompts)) {
         setSuggestedPrompts(data.suggestedQuickPrompts);
       }
 
+      // Speak answer once and cleanly stop!
       if (soaMsg.spokenText) {
+        isSpeakingRef.current = true;
         setIsSpeaking(true);
-        audioService.speak(soaMsg.spokenText, {
-          onEnd: () => {
-            setIsSpeaking(false);
-            if (isHandsFreeEnabled && recognitionRef.current) {
-              try {
-                recognitionRef.current.start();
-              } catch (e) {}
-            }
+
+        audioService.speak(
+          soaMsg.spokenText,
+          {
+            onEnd: () => {
+              isSpeakingRef.current = false;
+              setIsSpeaking(false);
+              // Cooldown delay of 1.4s so speaker reverberation won't re-trigger the mic
+              setTimeout(() => {
+                if (
+                  isHandsFreeRef.current &&
+                  !isSpeakingRef.current &&
+                  !isProcessingRef.current &&
+                  recognitionRef.current
+                ) {
+                  try {
+                    recognitionRef.current.start();
+                  } catch (e) {}
+                }
+              }, 1400);
+            },
+            onError: () => {
+              isSpeakingRef.current = false;
+              setIsSpeaking(false);
+            },
           },
-          onError: () => {
-            setIsSpeaking(false);
-          },
-        });
+          language
+        );
       }
     } catch (err) {
       console.error('Error contacting backend voice API', err);
+      isProcessingRef.current = false;
       setIsProcessing(false);
+      isSpeakingRef.current = false;
+      setIsSpeaking(false);
       const fallbackMsg: VoiceMessage = {
         id: `soa-err-${Date.now()}`,
         sender: 'soa',
-        text: "I'm right here babe! NailsbySoa is open today. You can check your previous $165 3D Cyber Chrome set, active coupon BARBIE20, or book a slot for tomorrow!",
+        text: "I'm right here babe! NailsbySoa is open today. You have coupon BARBIE20 active and slots open tomorrow!",
         spokenText: "I'm right here babe! NailsbySoa is open. You have coupon BARBIE20 active and slots open tomorrow!",
         timestamp: 'Just now',
-        durationSeconds: 7,
+        durationSeconds: 6,
       };
       setMessages((prev) => [...prev, fallbackMsg]);
     }
@@ -356,26 +481,65 @@ export default function App() {
           {/* Header: SOA VOICE with Y2K Barbie Styling */}
           <header className="flex flex-col items-center justify-center pt-2 pb-1 border-b border-[#b40065]/20 select-none relative">
             
-            {/* Top Navigation & DVD Mode Switcher */}
+            {/* Top Navigation: Lucky Girl Era, Language Switcher, DVD Mode Switcher */}
             <div className="w-full flex items-center justify-between px-1 mb-1">
               <div className="flex items-center gap-1.5 bg-white/90 px-2.5 py-0.5 rounded-full border border-pink-200 shadow-xs">
                 <span className="text-xs">🍀</span>
                 <span className="font-syne text-[10px] font-bold text-[#b40065]">
-                  Lucky Girl Era
+                  {language === 'fr' ? 'Ère Lucky Girl' : 'Lucky Girl Era'}
                 </span>
               </div>
 
-              <button
-                onClick={() => {
-                  audioService.playBouncingBlip(520);
-                  setView('screensaver');
-                }}
-                className="flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-pixel text-xs tracking-wider uppercase shadow-xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                title="Watch bouncing DVD logo"
-              >
-                <span>💿</span>
-                <span>DVD SCREENSAVER</span>
-              </button>
+              <div className="flex items-center gap-2">
+                {/* Language Switcher Button [ 🇺🇸 EN | 🇫🇷 FR ] */}
+                <div
+                  className="flex items-center bg-white/95 rounded-full p-0.5 border border-[#e3bdc7] shadow-xs"
+                  title={language === 'fr' ? 'Changer de langue' : 'Switch language'}
+                >
+                  <button
+                    onClick={() => {
+                      if (language !== 'en') {
+                        audioService.playBouncingBlip(620);
+                        toggleLanguage('en');
+                      }
+                    }}
+                    className={`px-2 py-0.5 rounded-full font-space text-[10px] font-bold transition-all cursor-pointer ${
+                      language === 'en'
+                        ? 'bg-gradient-to-r from-[#b40065] to-[#e10080] text-white shadow-xs'
+                        : 'text-[#8f6e78] hover:text-[#1f1a1d]'
+                    }`}
+                  >
+                    🇺🇸 EN
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (language !== 'fr') {
+                        audioService.playBouncingBlip(620);
+                        toggleLanguage('fr');
+                      }
+                    }}
+                    className={`px-2 py-0.5 rounded-full font-space text-[10px] font-bold transition-all cursor-pointer ${
+                      language === 'fr'
+                        ? 'bg-gradient-to-r from-[#b40065] to-[#e10080] text-white shadow-xs'
+                        : 'text-[#8f6e78] hover:text-[#1f1a1d]'
+                    }`}
+                  >
+                    🇫🇷 FR
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => {
+                    audioService.playBouncingBlip(520);
+                    setView('screensaver');
+                  }}
+                  className="flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-pixel text-xs tracking-wider uppercase shadow-xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                  title="Watch bouncing DVD logo"
+                >
+                  <span>💿</span>
+                  <span>DVD SCREENSAVER</span>
+                </button>
+              </div>
             </div>
 
             {/* Title: SOA VOICE */}
@@ -388,7 +552,9 @@ export default function App() {
             </div>
 
             <p className="font-pixel text-xs text-[#8f6e78] tracking-widest uppercase">
-              NAILSBYSOA ATELIER // STANDALONE Y2K VOICE AGENT
+              {language === 'fr'
+                ? 'ATELIER NAILSBYSOA // AGENT VOCAL Y2K MCBLING'
+                : 'NAILSBYSOA ATELIER // STANDALONE Y2K VOICE AGENT'}
             </p>
           </header>
 
@@ -402,7 +568,9 @@ export default function App() {
               <span className="text-[#764d93] text-[10px] font-semibold">✦ Diamond Starlet</span>
             </div>
             <div className="flex items-center space-x-1 shrink-0">
-              <span className="text-[#8f6e78]">Sparkle Cash:</span>
+              <span className="text-[#8f6e78]">
+                {language === 'fr' ? 'Solde Sparkle Cash :' : 'Sparkle Cash:'}
+              </span>
               <span className="font-bold text-[#b40065] bg-[#ffd9e3] px-2 py-0.5 rounded-full text-[11px]">
                 ${clientProfile?.sparkleCash.toFixed(2) || '34.50'}
               </span>
@@ -415,8 +583,17 @@ export default function App() {
             isSpeaking={isSpeaking}
             isProcessing={isProcessing}
             onOrbClick={toggleMic}
+            language={language}
             statusText={
-              isListening
+              language === 'fr'
+                ? isListening
+                  ? 'SOA vous écoute...'
+                  : isProcessing
+                  ? 'SOA consulte l\'atelier...'
+                  : isSpeaking
+                  ? 'SOA parle en direct...'
+                  : 'Dis « Hey SOA » ou touche l\'orbe'
+                : isListening
                 ? 'SOA is listening to you...'
                 : isProcessing
                 ? 'SOA is consulting atelier books...'
@@ -432,6 +609,7 @@ export default function App() {
             onSelectAction={sendVoiceQuery}
             onBookSlot={handleBookSlot}
             isProcessing={isProcessing}
+            language={language}
           />
 
           <div ref={scrollRef} />
@@ -440,6 +618,7 @@ export default function App() {
           <QuickPrompts
             prompts={suggestedPrompts}
             onSelectPrompt={sendVoiceQuery}
+            language={language}
           />
 
           {/* Dedicated Hands-Free Voice Controller Bar */}
@@ -450,12 +629,15 @@ export default function App() {
             onToggleHandsFree={() => setIsHandsFreeEnabled(!isHandsFreeEnabled)}
             onToggleMic={toggleMic}
             onSubmitText={sendVoiceQuery}
+            language={language}
           />
 
           {/* Cyber Footer Watermark */}
           <footer className="text-center pt-2 select-none border-t border-[#b40065]/10">
             <p className="font-pixel text-[#8f6e78] tracking-widest uppercase text-xs">
-              ✦ 100% HANDS-FREE VOICE AGENT • Y2K CYBER BARBIE INTERFACE • NAILSBYSOA ✦
+              {language === 'fr'
+                ? '✦ AGENT VOCAL 100% MAINS LIBRES • INTERFACE CYBER BARBIE Y2K • NAILSBYSOA ✦'
+                : '✦ 100% HANDS-FREE VOICE AGENT • Y2K CYBER BARBIE INTERFACE • NAILSBYSOA ✦'}
             </p>
           </footer>
         </div>

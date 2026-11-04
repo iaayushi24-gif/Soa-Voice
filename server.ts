@@ -333,15 +333,20 @@ app.get('/api/bookings', (req, res) => {
 });
 
 // Helper for deterministic high-glam fallback when Gemini is unavailable or errors
-function generateFallbackResponse(userPrompt: string) {
+function generateFallbackResponse(userPrompt: string, language: string = 'en') {
   const q = userPrompt.toLowerCase();
+  const isFr = language === 'fr' || q.includes('bonjour') || q.includes('français') || q.includes('combien') || q.includes('dernier') || q.includes('rendez-vous');
 
   // Previous appointment / sets / how much she paid
-  if (q.includes('last') || q.includes('previous') || q.includes('paid') || q.includes('cost') || q.includes('balance') || q.includes('past set')) {
+  if (q.includes('last') || q.includes('previous') || q.includes('paid') || q.includes('cost') || q.includes('balance') || q.includes('past set') || q.includes('dernier') || q.includes('payé') || q.includes('solde')) {
     const prev = studioData.client.lastAppointment;
     return {
-      spokenText: `Last Friday you got the ${prev.set} with ${prev.technician} for $${prev.amountPaid}. You have $${studioData.client.sparkleCash} in Sparkle Cash and coupon BARBIE20 active!`,
-      displayText: `Last Friday with **${prev.technician}**, you got the **${prev.set}** (${prev.shape}) for **$${prev.amountPaid.toFixed(2)}**. You currently have **$${studioData.client.sparkleCash.toFixed(2)} Sparkle Cash** & code **BARBIE20** (20% off) ready to use! Would you like to book a refill or explore trending jelly aura designs?`,
+      spokenText: isFr
+        ? `Hey babe ! Ton dernier set était le 3D Cyber Chrome avec Naomi pour 165 euros. Tu as 34 euros de Sparkle Cash !`
+        : `Hey babe! Your last set was 3D Cyber Chrome with Naomi for 165 dollars. You got 34 dollars in Sparkle Cash!`,
+      displayText: isFr
+        ? `Coucou babe ! Vendredi dernier avec **${prev.technician}**, tu as fait le **${prev.set}** (${prev.shape}) pour **${prev.amountPaid.toFixed(2)} €**. Tu as actuellement **${studioData.client.sparkleCash.toFixed(2)} € de Sparkle Cash** et le code promo **BARBIE20** (20% de réduction) ! Veux-tu réserver ton remplissage ou explorer les tendances jelly aura, babe ?`
+        : `Hey babe! Last Friday with **${prev.technician}**, you got the **${prev.set}** (${prev.shape}) for **$${prev.amountPaid.toFixed(2)}**. You currently have **$${studioData.client.sparkleCash.toFixed(2)} Sparkle Cash** & code **BARBIE20** (20% off) ready! Want me to book your refill or explore trending jelly aura designs, babe?`,
       intent: 'past_appointments',
       actionData: {
         type: 'past_set',
@@ -349,60 +354,63 @@ function generateFallbackResponse(userPrompt: string) {
         sparkleCash: studioData.client.sparkleCash,
         coupons: studioData.client.coupons,
       },
-      suggestedQuickPrompts: [
-        'Re-book my last set',
-        'What coupons do I have?',
-        'Show limited edition drops',
-        'Trending cyber chrome ideas',
-      ],
+      suggestedQuickPrompts: isFr
+        ? ['Reprendre mon dernier set', 'Mes coupons VIP', 'Drops édition limitée', 'Idées cyber chrome']
+        : ['Re-book my last set', 'What coupons do I have?', 'Show limited edition drops', 'Trending cyber chrome ideas'],
     };
   }
 
   // Coupons / discounts
-  if (q.includes('coupon') || q.includes('discount') || q.includes('promo') || q.includes('sparkle cash') || q.includes('deal')) {
+  if (q.includes('coupon') || q.includes('discount') || q.includes('promo') || q.includes('sparkle cash') || q.includes('deal') || q.includes('réduction') || q.includes('solde')) {
     return {
-      spokenText: `You have code BARBIE20 for 20% off any full set, plus SPARKLE15 for $15 off refills, and thirty-four fifty in Sparkle Cash!`,
-      displayText: `You have **2 VIP discounts** loaded:\n• **BARBIE20**: 20% off any Cyber Chrome or Limited Set\n• **SPARKLE15**: $15 off any refill or nail art tier\n• **Sparkle Cash Balance**: **$${studioData.client.sparkleCash.toFixed(2)}** redeemable anytime!\nShall we apply BARBIE20 to your next booking?`,
+      spokenText: isFr
+        ? `Je gère babe ! Le code BARBIE20 te donne 20% de réduction, plus 34 euros de Sparkle Cash !`
+        : `I got you babe! Code BARBIE20 gives you 20% off, plus 34 dollars in Sparkle Cash!`,
+      displayText: isFr
+        ? `Voici tes promos VIP, babe ! 💕\n• **BARBIE20** : 20% de réduction sur tout set complet\n• **SPARKLE15** : 15 € offerts sur tout remplissage ou nail art\n• **Solde Sparkle Cash** : **${studioData.client.sparkleCash.toFixed(2)} €** disponibles !\nOn applique BARBIE20 pour ta réservation, babe ?`
+        : `Here are your VIP perks, babe! 💕\n• **BARBIE20**: 20% off any Cyber Chrome or Limited Set\n• **SPARKLE15**: $15 off any refill or nail art tier\n• **Sparkle Cash Balance**: **$${studioData.client.sparkleCash.toFixed(2)}** redeemable anytime!\nShall we apply BARBIE20 to your next booking, babe?`,
       intent: 'coupons_discounts',
       actionData: {
         type: 'coupons',
         coupons: studioData.client.coupons,
         sparkleCash: studioData.client.sparkleCash,
       },
-      suggestedQuickPrompts: [
-        'Apply BARBIE20 and book',
-        'Check tomorrow\'s availability',
-        'Limited edition drops',
-        'Inspire me with nail art',
-      ],
+      suggestedQuickPrompts: isFr
+        ? ['Appliquer BARBIE20', 'Créneaux de demain', 'Drops exclusifs', 'Inspirations nail art']
+        : ['Apply BARBIE20 and book', 'Check tomorrow\'s availability', 'Limited edition drops', 'Inspire me with nail art'],
     };
   }
 
   // Limited edition drops
-  if (q.includes('limited') || q.includes('edition') || q.includes('drop') || q.includes('exclusive') || q.includes('bratz')) {
+  if (q.includes('limited') || q.includes('edition') || q.includes('drop') || q.includes('exclusive') || q.includes('bratz') || q.includes('limitée')) {
     const drop = studioData.limitedEditions[0];
     return {
-      spokenText: `Our hottest drop is the ${drop.title} for $${drop.price}, featuring liquid mercury chrome and floating angel charms. Only ${drop.remainingSlots} slots left!`,
-      displayText: `✨ **Current Limited Edition Drops:**\n1. **${drop.title}** ($${drop.price}) - *${drop.badge}*: Liquid mercury chrome, hand-laid holographic foil, and floating metal angel charms.\n2. **Barbiecore 2000s Dreamhouse** ($165) - Hot pink jelly gradient & Swarovski crystal hearts.\n3. **Poison Jelly Neon Aura** ($155) - Translucent acid lime edge with magenta aura.\nWant me to reserve one of the remaining slots for you?`,
+      spokenText: isFr
+        ? `Trop canon babe ! Le drop Bratz Cyber Angel est en ligne avec seulement 4 créneaux restants !`
+        : `Hey babe! The Bratz Cyber Angel drop is live with only 4 slots left!`,
+      displayText: isFr
+        ? `✨ **Drops Atelier en Édition Limitée pour toi, babe :**\n1. **${drop.title}** (${drop.price} €) - *${drop.badge}* : Chrome mercure liquide, foils holographiques et breloques anges.\n2. **Barbiecore 2000s Dreamhouse** (165 €) : Dégradé jelly rose bonbon & cristaux Swarovski.\n3. **Poison Jelly Neon Aura** (155 €) : Vert acidulé avec aura magenta.\nTu veux que je te réserve un créneau, babe ?`
+        : `✨ **Current Limited Edition Drops for you, babe:**\n1. **${drop.title}** ($${drop.price}) - *${drop.badge}*: Liquid mercury chrome, hand-laid holographic foil, and floating metal angel charms.\n2. **Barbiecore 2000s Dreamhouse** ($165) - Hot pink jelly gradient & Swarovski crystal hearts.\n3. **Poison Jelly Neon Aura** ($155) - Translucent acid lime edge with magenta aura.\nWant me to reserve one of the remaining slots for you, babe?`,
       intent: 'limited_edition',
       actionData: {
         type: 'limited_editions',
         items: studioData.limitedEditions,
       },
-      suggestedQuickPrompts: [
-        'Book the Cyber Angel drop',
-        'Show all available slots',
-        'What did I pay last time?',
-        'Trending nail shapes',
-      ],
+      suggestedQuickPrompts: isFr
+        ? ['Réserver Cyber Angel', 'Voir les créneaux', 'Mon dernier paiement', 'Formes tendance']
+        : ['Book the Cyber Angel drop', 'Show all available slots', 'What did I pay last time?', 'Trending nail shapes'],
     };
   }
 
   // Inspiration / designs / shapes / colours / trending
-  if (q.includes('inspire') || q.includes('idea') || q.includes('shape') || q.includes('colour') || q.includes('color') || q.includes('trend') || q.includes('design')) {
+  if (q.includes('inspire') || q.includes('idea') || q.includes('shape') || q.includes('colour') || q.includes('color') || q.includes('trend') || q.includes('design') || q.includes('forme') || q.includes('couleur') || q.includes('idée')) {
     return {
-      spokenText: `Right now, long stiletto nails with 3D liquid molten chrome and hot pink jelly aura are reigning supreme! Want to see the color palettes?`,
-      displayText: `💅 **Y2K Cyber Glam Styling Inspiration:**\n• **Trending Shapes:** Stiletto (ultra-sleek & sharp) and 2000s Duck or Tapered Coffin.\n• **Hot Finishes:** 3D Molten Metal Chrome Drips, Pierced Charms, and Magnetic Velvet Cat-Eye.\n• **Viral Palette:** **Cyber Doll** (Hot Magenta #FF1493 + Mirror Chrome Silver + Holographic Lilac).\nWant me to set up an appointment for this look with Naomi or Soa?`,
+      spokenText: isFr
+        ? `Ooh babe ! Les ongles stiletto avec gouttes chromées 3D font fureur en ce moment !`
+        : `Ooh babe! Long stiletto nails with 3D chrome drips are super hot right now!`,
+      displayText: isFr
+        ? `💅 **Inspirations Y2K Cyber Glam pour toi, babe :**\n• **Formes tendance :** Stiletto (ultra-pointu & glam) et Coffin effilé.\n• **Finitions :** Gouttes de métal liquide 3D, piercings d'ongles, et effet œil de chat velours.\n• **Palette virale :** **Cyber Doll** (Magenta électrique + Chrome miroir argent + Lilas holographique).\nOn te réserve ce look avec Naomi ou Soa, babe ?`
+        : `💅 **Y2K Cyber Glam Styling Inspiration for you, babe:**\n• **Trending Shapes:** Stiletto (ultra-sleek & sharp) and 2000s Duck or Tapered Coffin.\n• **Hot Finishes:** 3D Molten Metal Chrome Drips, Pierced Charms, and Magnetic Velvet Cat-Eye.\n• **Viral Palette:** **Cyber Doll** (Hot Magenta #FF1493 + Mirror Chrome Silver + Holographic Lilac).\nWant me to set up an appointment for this look with Naomi or Soa, babe?`,
       intent: 'nail_inspiration',
       actionData: {
         type: 'inspiration',
@@ -410,40 +418,42 @@ function generateFallbackResponse(userPrompt: string) {
         finishes: studioData.inspirationCatalog.trendingFinishes,
         palettes: studioData.inspirationCatalog.colorPalettes,
       },
-      suggestedQuickPrompts: [
-        'Book 3D Cyber Chrome set',
-        'Check availability today',
-        'What coupons do I have?',
-        'Tell me about duck nails',
-      ],
+      suggestedQuickPrompts: isFr
+        ? ['Réserver set Cyber Chrome', 'Dispos aujourd’hui', 'Mes codes promo', 'Formes d\'ongles']
+        : ['Book 3D Cyber Chrome set', 'Check availability today', 'What coupons do I have?', 'Tell me about duck nails'],
     };
   }
 
   // Book appointment / availability
-  if (q.includes('book') || q.includes('appointment') || q.includes('schedule') || q.includes('available') || q.includes('slot') || q.includes('time') || q.includes('today') || q.includes('tomorrow')) {
+  if (q.includes('book') || q.includes('appointment') || q.includes('schedule') || q.includes('available') || q.includes('slot') || q.includes('time') || q.includes('today') || q.includes('tomorrow') || q.includes('réserve') || q.includes('créneau') || q.includes('dispo')) {
     const nextSlot = studioData.availableSlots[0];
     return {
-      spokenText: `We have an opening today at ${nextSlot.time} with ${nextSlot.artist}, and tomorrow at 1:30 PM with Naomi. Would you like me to book one?`,
-      displayText: `✨ **Current Service Availability at NailsbySoa:**\n• **Today:** ${studioData.availableSlots[0].time} with **${studioData.availableSlots[0].artist}** | ${studioData.availableSlots[1].time} with **${studioData.availableSlots[1].artist}**\n• **Tomorrow:** 11:00 AM with **Chloe** | 1:30 PM with **Naomi** | 4:00 PM with **Soa**\nSay "Book tomorrow at 1:30 PM with Naomi" or tap to confirm!`,
+      spokenText: isFr
+        ? `J'ai regardé pour toi babe ! Naomi a un créneau demain à 13h30 ou Soa à 16h00 !`
+        : `I checked for you babe! Naomi has an opening tomorrow at 1:30 PM, or Soa at 4:00 PM!`,
+      displayText: isFr
+        ? `✨ **Disponibilités actuelles chez NailsbySoa :**\n• **Aujourd'hui :** ${studioData.availableSlots[0].time} avec **${studioData.availableSlots[0].artist}** | ${studioData.availableSlots[1].time} avec **${studioData.availableSlots[1].artist}**\n• **Demain :** 11h00 avec **Chloe** | 13h30 avec **Naomi** | 16h00 avec **Soa**\nDis « Réserve demain à 13h30 avec Naomi » ou clique pour valider, babe !`
+        : `✨ **Current Service Availability at NailsbySoa:**\n• **Today:** ${studioData.availableSlots[0].time} with **${studioData.availableSlots[0].artist}** | ${studioData.availableSlots[1].time} with **${studioData.availableSlots[1].artist}**\n• **Tomorrow:** 11:00 AM with **Chloe** | 1:30 PM with **Naomi** | 4:00 PM with **Soa**\nSay "Book tomorrow at 1:30 PM with Naomi" or tap to confirm, babe!`,
       intent: 'check_availability',
       actionData: {
         type: 'availability',
         slots: studioData.availableSlots,
         services: studioData.services,
       },
-      suggestedQuickPrompts: [
-        'Book tomorrow at 1:30 PM',
-        'Book today at 3:30 PM',
-        'Apply my BARBIE20 coupon',
-        'Re-book my last set',
-      ],
+      suggestedQuickPrompts: isFr
+        ? ['Réserver demain à 13h30', 'Réserver aujourd\'hui', 'Appliquer BARBIE20', 'Reprendre mon set']
+        : ['Book tomorrow at 1:30 PM', 'Book today at 3:30 PM', 'Apply my BARBIE20 coupon', 'Re-book my last set'],
     };
   }
 
   // General default greeting / helper
   return {
-    spokenText: `Hey babe, I'm SOA Voice! I can book your appointment, check availability, pull up your previous sets, show your coupons, or inspire your next set!`,
-    displayText: `Hey gorgeous! Welcome to **SOA Voice** ✦ the official Y2K Barbiecore voice atelier for **NailsbySoa**.\n\nAsk me anything like:\n• *"What sets did I get last time and what did I pay?"*\n• *"What coupons or discounts do I have?"*\n• *"Are there any limited edition drops right now?"*\n• *"I need ideas for new nail designs, shapes, and colors!"*\n• *"Check availability and book an appointment with Naomi"*`,
+    spokenText: isFr
+      ? `Coucou babe ! Je suis Soa Voice. Demande-moi tes anciens sets, tes promos ou réserve un créneau !`
+      : `Hey babe! I'm Soa Voice. Ask me about your past sets, coupons, or book a slot!`,
+    displayText: isFr
+      ? `Coucou babe ! Bienvenue sur **SOA Voice** ✦ ton assistante vocale fun et stylée chez **NailsbySoa**.\n\nDemande-moi tout ce que tu veux :\n• *« Quels sets ai-je faits la dernière fois, babe ? »*\n• *« Quels coupons ou réductions ai-je ? »*\n• *« Y a-t-il des drops en édition limitée en ce moment ? »*\n• *« Donne-moi des idées de formes, couleurs et designs ! »*\n• *« Réserve un rendez-vous avec Naomi »*`
+      : `Hey babe! Welcome to **SOA Voice** ✦ your fun, cool Y2K Barbiecore voice bestie at **NailsbySoa**.\n\nAsk me anything like:\n• *"What sets did I get last time, babe?"*\n• *"What coupons or discounts do I have?"*\n• *"Are there any limited edition drops right now?"*\n• *"I need ideas for new nail designs, shapes, and colors!"*\n• *"Check availability and book an appointment with Naomi"*`,
     intent: 'general_info',
     actionData: {
       type: 'overview',
@@ -451,33 +461,34 @@ function generateFallbackResponse(userPrompt: string) {
       services: studioData.services.slice(0, 3),
       drops: studioData.limitedEditions.slice(0, 2),
     },
-    suggestedQuickPrompts: [
-      'What sets did I get last time?',
-      'What coupons do I have?',
-      'Check availability today',
-      'Trending nail designs & shapes',
-    ],
+    suggestedQuickPrompts: isFr
+      ? ['Dernier rendez-vous', 'Mes coupons', 'Disponibilités', 'Tendances nail art']
+      : ['What sets did I get last time?', 'What coupons do I have?', 'Check availability today', 'Trending nail designs & shapes'],
   };
 }
 
 // API: Process Voice Query with Gemini 3.8 Flash
 app.post('/api/voice/process', async (req, res) => {
-  const { prompt, conversationHistory = [] } = req.body;
+  const { prompt, conversationHistory = [], language = 'en' } = req.body;
 
   if (!prompt || typeof prompt !== 'string') {
     return res.status(400).json({ error: 'Prompt string is required.' });
   }
 
+  const isFr = language === 'fr' || prompt.toLowerCase().includes('bonjour') || prompt.toLowerCase().includes('français');
+
   // If Gemini client is not initialized (e.g. no key), return deterministic high-glam fallback
   if (!ai) {
-    const fallback = generateFallbackResponse(prompt);
+    const fallback = generateFallbackResponse(prompt, language);
     return res.json(fallback);
   }
 
   try {
-    const systemPrompt = `You are "SOA Voice", the standalone Y2K Barbiecore AI voice assistant for "NailsbySoa" – the high-glam Beverly Hills nail studio.
-Your persona:
-- High energy, hyper-feminine, luxurious, cyber-chic Y2K Barbiecore (playful, confident, sweet, saying words like "babe", "gorgeous", "glam", "slay", "chrome", "sparkle").
+    const systemPrompt = `You are "SOA Voice", the fun, cool, affectionate Y2K Barbiecore AI voice assistant for "NailsbySoa" – the high-glam Beverly Hills nail studio.
+Your persona & signature speaking style:
+- You are a fun, super cool, stylish bestie who ALWAYS calls the client "babe" naturally and affectionately (e.g., "Hey babe!", "I got you babe!", "You're all booked babe!").
+- High energy, hyper-feminine, luxurious, cyber-chic Y2K Barbiecore. You love hyping up her nails and saying words like "babe", "gorgeous", "glam", "slay", "chrome", "sparkle".
+- In French: maintain the exact same fun, cool, affectionate vibe, calling her "babe" naturally (e.g. "Coucou babe !", "Je gère babe !", "Trop canon babe !").
 - Extremely knowledgeable about nail sculpting, stiletto/coffin/duck shapes, mirror chrome, jelly aura, cat-eye, molten metal, and Bratz 2000s aesthetics.
 
 Studio Knowledge:
@@ -489,19 +500,24 @@ Studio Knowledge:
 - Availability: Today (3:30 PM with Naomi, 5:45 PM with Soa), Tomorrow (11:00 AM Chloe, 1:30 PM Naomi, 4:00 PM Soa), Friday (12:30 PM Naomi).
 - Nail Art Inspiration: Shapes (Stiletto, Coffin, Duck, Almond), Finishes (3D Molten Metal, Mirror Chrome, Jelly Aura, Velvet Cat-Eye, Pierced Charms), Palettes (Cyber Doll, Strawberry Milk Chrome, Toxic Barbie).
 
+LANGUAGE & VOICE INSTRUCTIONS:
+- The user has selected: ${isFr ? 'FRENCH (Français)' : 'ENGLISH'}.
+- You MUST write the ENTIRE JSON response (spokenText, displayText, and suggestedQuickPrompts) in ${isFr ? 'FRENCH (Français)' : 'ENGLISH'}.
+- "spokenText": MUST be strictly 1 single short, fun, cool sentence (under 18 words) in ${isFr ? 'French' : 'English'}, and YOU MUST naturally call the client "babe" (e.g. "Hey babe, your last set was 3D Cyber Chrome for 165 dollars!", "I got you babe, code BARBIE20 gives you 20% off!"). Never read paragraphs or long explanations!
+
 User query: "${prompt}".
 
 CRITICAL INSTRUCTIONS:
 1. Always respond in valid JSON format matching this schema:
 {
-  "spokenText": "1-3 punchy, conversational sentences designed for spoken voice synthesis. Natural, energetic Y2K barbie tone without markdown formatting.",
-  "displayText": "Rich formatted text for the on-screen speech card, highlighting prices, coupon codes, and set names in bold.",
+  "spokenText": "STRICTLY 1 SHORT SENTENCE in ${isFr ? 'French' : 'English'} calling her 'babe' (under 18 words total). Answer directly and stop immediately.",
+  "displayText": "Rich formatted text in ${isFr ? 'French' : 'English'} for the on-screen card, calling her 'babe' and highlighting prices, coupon codes, and set names in bold.",
   "intent": "One of: 'book_appointment', 'check_availability', 'past_appointments', 'coupons_discounts', 'limited_edition', 'nail_inspiration', 'general_info'",
   "actionData": {
     "type": "past_set" | "coupons" | "limited_editions" | "inspiration" | "availability" | "booking_confirm",
     "details": {}
   },
-  "suggestedQuickPrompts": ["3 to 4 short prompts under 8 words each that the user can say next"]
+  "suggestedQuickPrompts": ["3 to 4 short prompts in ${isFr ? 'French' : 'English'} under 6 words each"]
 }
 
 If the user wants to book or asks about availability, confirm or list available slots.
@@ -525,16 +541,64 @@ If the user asks for design inspiration, suggest trending cyber chrome, molten d
       parsed = JSON.parse(rawText);
     } catch {
       // If parsing fails, fall back gracefully
-      parsed = generateFallbackResponse(prompt);
+      parsed = generateFallbackResponse(prompt, language);
     }
 
     return res.json(parsed);
   } catch (err: any) {
     console.error('Error generating voice response from Gemini:', err?.message || err);
     // Graceful fallback ensures user never gets an error
-    const fallback = generateFallbackResponse(prompt);
+    const fallback = generateFallbackResponse(prompt, language);
     return res.json(fallback);
   }
+});
+
+// API: Generate Voice Speech with Soft Female Voice
+app.post('/api/voice/tts', async (req, res) => {
+  const { text, language = 'en' } = req.body;
+  if (!text || typeof text !== 'string') {
+    return res.status(400).json({ error: 'Text prompt required.' });
+  }
+
+  if (ai) {
+    try {
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.8-flash-lite-tts',
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              {
+                text: text,
+                speechMetadata: {
+                  style: language === 'fr'
+                    ? 'Soft, cool, playful, affectionate female voice speaking French softly and naturally at a steady, warm pace, calling the user babe'
+                    : 'Soft, cool, playful, affectionate female voice speaking softly and naturally at a steady, warm pace, calling the user babe',
+                },
+              },
+            ],
+          },
+        ],
+        config: {
+          responseModalities: ['AUDIO'],
+          speechConfig: {
+            voiceConfig: {
+              prebuiltVoiceConfig: { voiceName: 'Achernar' },
+            },
+          },
+        },
+      });
+
+      const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+      if (base64Audio) {
+        return res.json({ audioUrl: `data:audio/wav;base64,${base64Audio}` });
+      }
+    } catch (e: any) {
+      console.warn('Gemini TTS error:', e?.message || e);
+    }
+  }
+
+  res.json({ fallback: true });
 });
 
 // Setup Vite in Dev or Static Serving in Prod

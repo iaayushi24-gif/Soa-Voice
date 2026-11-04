@@ -7,6 +7,7 @@ interface HandsFreeBarProps {
   onToggleHandsFree: () => void;
   onToggleMic: () => void;
   onSubmitText: (text: string) => void;
+  language?: 'en' | 'fr';
 }
 
 export const HandsFreeBar: React.FC<HandsFreeBarProps> = ({
@@ -16,6 +17,7 @@ export const HandsFreeBar: React.FC<HandsFreeBarProps> = ({
   onToggleHandsFree,
   onToggleMic,
   onSubmitText,
+  language = 'en',
 }) => {
   const [showInput, setShowInput] = useState(false);
   const [typedText, setTypedText] = useState('');
@@ -53,15 +55,15 @@ export const HandsFreeBar: React.FC<HandsFreeBarProps> = ({
           <div className="flex flex-col min-w-0 flex-1">
             <span className="font-syne text-xs font-bold text-[#1f1a1d] truncate">
               {isListening
-                ? interimTranscript || 'Listening to your voice...'
+                ? interimTranscript || (language === 'fr' ? 'À l\'écoute de votre voix...' : 'Listening to your voice...')
                 : isHandsFreeEnabled
-                ? 'Hands-free mode active'
-                : 'Tap mic or say "Hey SOA"'}
+                ? (language === 'fr' ? 'Mode mains libres actif' : 'Hands-free mode active')
+                : (language === 'fr' ? 'Touche le micro ou dis « Hey SOA »' : 'Tap mic or say "Hey SOA"')}
             </span>
             <span className="font-space text-[#8f6e78] text-[10px] truncate">
               {isListening
-                ? 'Speak naturally about nails, appointments, or deals'
-                : 'Say "Hey SOA" anytime hands-free'}
+                ? (language === 'fr' ? 'Parle de tes ongles, rendez-vous ou promos' : 'Speak naturally about nails, appointments, or deals')
+                : (language === 'fr' ? 'Dis « Hey SOA » à tout moment en mains libres' : 'Say "Hey SOA" anytime hands-free')}
             </span>
           </div>
         </div>
@@ -84,7 +86,7 @@ export const HandsFreeBar: React.FC<HandsFreeBarProps> = ({
                   : 'bg-white text-[#8f6e78] border border-[#e3bdc7]'
               }`}
             >
-              {isHandsFreeEnabled ? '⚡ AUTO' : 'TAP ONLY'}
+              {isHandsFreeEnabled ? '⚡ AUTO' : (language === 'fr' ? 'MANUEL' : 'TAP ONLY')}
             </button>
           )}
 
@@ -111,7 +113,7 @@ export const HandsFreeBar: React.FC<HandsFreeBarProps> = ({
             type="text"
             value={typedText}
             onChange={(e) => setTypedText(e.target.value)}
-            placeholder="Or type here e.g. What did I pay last time?"
+            placeholder={language === 'fr' ? "Ou écris ici : Quel était mon dernier set ?" : "Or type here e.g. What did I pay last time?"}
             className="flex-1 bg-transparent px-3 py-1 font-jakarta text-xs text-[#1f1a1d] outline-none placeholder:text-[#8f6e78]"
             autoFocus
           />
@@ -120,7 +122,7 @@ export const HandsFreeBar: React.FC<HandsFreeBarProps> = ({
             disabled={!typedText.trim()}
             className="bg-gradient-to-r from-[#b40065] to-[#e10080] text-white px-3 py-1.5 rounded-full font-space text-xs font-bold disabled:opacity-40 cursor-pointer"
           >
-            Ask SOA
+            {language === 'fr' ? 'Demander à SOA' : 'Ask SOA'}
           </button>
         </form>
       )}

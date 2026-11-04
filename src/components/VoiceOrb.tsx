@@ -6,6 +6,7 @@ interface VoiceOrbProps {
   isProcessing: boolean;
   onOrbClick: () => void;
   statusText?: string;
+  language?: 'en' | 'fr';
 }
 
 export const VoiceOrb: React.FC<VoiceOrbProps> = ({
@@ -14,6 +15,7 @@ export const VoiceOrb: React.FC<VoiceOrbProps> = ({
   isProcessing,
   onOrbClick,
   statusText,
+  language = 'en',
 }) => {
   return (
     <div className="flex flex-col items-center justify-center py-5 relative overflow-hidden select-none">
@@ -54,15 +56,29 @@ export const VoiceOrb: React.FC<VoiceOrbProps> = ({
 
         <span
           className={`material-symbols-outlined text-[42px] drop-shadow-md transition-transform duration-300 ${
-            isListening ? 'scale-115 text-white animate-bounce' : isSpeaking ? 'text-[#79f5fb]' : 'group-hover:scale-110'
+            isListening ? 'scale-115 text-white animate-bounce' : isSpeaking ? 'text-[#ffd9e3] animate-pulse' : 'group-hover:scale-110'
           }`}
           style={{ fontVariationSettings: "'FILL' 1" }}
         >
-          {isProcessing ? 'hourglass_top' : isListening ? 'mic' : isSpeaking ? 'volume_up' : 'mic'}
+          {isProcessing ? 'hourglass_top' : isListening ? 'mic' : isSpeaking ? 'stop_circle' : 'mic'}
         </span>
         
         <span className="font-space text-[10px] tracking-widest uppercase text-white/95 font-bold mt-0.5 drop-shadow">
-          {isListening ? 'LISTENING' : isProcessing ? 'THINKING' : isSpeaking ? 'SPEAKING' : 'HOLD / TAP'}
+          {language === 'fr'
+            ? isListening
+              ? 'ÉCOUTE'
+              : isProcessing
+              ? 'RÉFLEXION'
+              : isSpeaking
+              ? 'TOUCHER POUR ARRÊTER'
+              : 'MAINTENIR / TOUCHER'
+            : isListening
+            ? 'LISTENING'
+            : isProcessing
+            ? 'THINKING'
+            : isSpeaking
+            ? 'TAP TO STOP'
+            : 'HOLD / TAP'}
         </span>
       </button>
 
@@ -109,10 +125,18 @@ export const VoiceOrb: React.FC<VoiceOrbProps> = ({
         />
         <span className="font-jakarta text-sm font-bold text-[#b40065] tracking-wide">
           {statusText ||
-            (isListening
+            (language === 'fr'
+              ? isListening
+                ? 'SOA vous écoute...'
+                : isProcessing
+                ? 'SOA consulte l\'atelier...'
+                : isSpeaking
+                ? 'SOA parle en direct...'
+                : 'SOA Voice Prêt'
+              : isListening
               ? 'SOA is listening...'
               : isProcessing
-              ? 'SOA is synthesizing...'
+              ? 'SOA is consulting atelier...'
               : isSpeaking
               ? 'SOA is speaking...'
               : 'SOA Voice Ready')}
@@ -120,7 +144,9 @@ export const VoiceOrb: React.FC<VoiceOrbProps> = ({
       </div>
 
       <span className="font-space text-[#8f6e78] uppercase tracking-wider text-xs mt-0.5">
-        Say "Hey SOA" or tap the orb to speak
+        {language === 'fr'
+          ? 'Dis « Hey SOA » ou touche l\'orbe pour parler'
+          : 'Say "Hey SOA" or tap the orb to speak'}
       </span>
     </div>
   );

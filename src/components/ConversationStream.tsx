@@ -8,6 +8,7 @@ interface ConversationStreamProps {
   onSelectAction: (voicePrompt: string) => void;
   onBookSlot?: (slot: AvailableSlot, couponCode?: string) => void;
   isProcessing?: boolean;
+  language?: 'en' | 'fr';
 }
 
 export const ConversationStream: React.FC<ConversationStreamProps> = ({
@@ -15,6 +16,7 @@ export const ConversationStream: React.FC<ConversationStreamProps> = ({
   onSelectAction,
   onBookSlot,
   isProcessing,
+  language = 'en',
 }) => {
   return (
     <div className="space-y-4 w-full">
@@ -23,7 +25,9 @@ export const ConversationStream: React.FC<ConversationStreamProps> = ({
           return (
             <div key={msg.id} className="flex flex-col items-end">
               <div className="flex items-center space-x-1.5 mb-1">
-                <span className="font-space text-xs text-[#8f6e78] font-medium">You</span>
+                <span className="font-space text-xs text-[#8f6e78] font-medium">
+                  {language === 'fr' ? 'Vous' : 'You'}
+                </span>
                 <span className="material-symbols-outlined text-[#8f6e78] text-[14px]">
                   graphic_eq
                 </span>
@@ -48,9 +52,6 @@ export const ConversationStream: React.FC<ConversationStreamProps> = ({
               <span className="font-space text-[#b40065] font-bold text-xs tracking-wider">
                 SOA Voice AI
               </span>
-              <span className="bg-[#ffd9e3] text-[#b40065] font-space text-[10px] px-2 py-0.5 rounded-full font-semibold">
-                Audio Synth
-              </span>
             </div>
 
             <div className="bg-gradient-to-r from-white to-[#f5ebef] border border-[#b40065]/25 text-[#1f1a1d] p-4 rounded-2xl rounded-tl-sm shadow-sm space-y-2.5 w-full">
@@ -73,6 +74,7 @@ export const ConversationStream: React.FC<ConversationStreamProps> = ({
                   actionData={msg.actionData}
                   onSelectAction={onSelectAction}
                   onBookSlot={onBookSlot}
+                  language={language}
                 />
               )}
             </div>
@@ -85,14 +87,13 @@ export const ConversationStream: React.FC<ConversationStreamProps> = ({
           <div className="flex items-center space-x-1.5 mb-1">
             <span className="text-[#b40065] font-bold text-xs">✦</span>
             <span className="font-space text-[#b40065] font-bold text-xs">SOA Voice AI</span>
-            <span className="bg-[#ffd9e3] text-[#b40065] font-space text-[10px] px-2 py-0.5 rounded-full">
-              Synthesizing...
-            </span>
           </div>
           <div className="bg-white/80 border border-[#b40065]/20 p-4 rounded-2xl rounded-tl-sm shadow-xs flex items-center space-x-2">
             <span className="w-2 h-2 rounded-full bg-[#b40065] animate-ping" />
             <span className="font-jakarta text-xs text-[#5b3f48] font-medium">
-              Consulting NailsbySoa appointment books & styling catalog...
+              {language === 'fr'
+                ? 'Consultation du carnet de rendez-vous et du catalogue NailsbySoa...'
+                : 'Consulting NailsbySoa appointment books & styling catalog...'}
             </span>
           </div>
         </div>
