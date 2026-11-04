@@ -1,0 +1,10 @@
+{
+  "name": "Soa Voice - NailsbySoa Y2K Voice AI",
+  "description": "Standalone Y2K Barbiecore voice assistant for NailsbySoa. Book appointments, check service availability, previous sets & spend, coupons, limited edition drops, and nail styling inspiration.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

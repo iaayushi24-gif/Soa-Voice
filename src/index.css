@@ -1,0 +1,206 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --primary: #b40065;
+    --primary-container: #e10080;
+    --primary-light: #ff65a9;
+    --secondary: #764d93;
+    --secondary-container: #dcacfb;
+    --secondary-fixed: #f3daff;
+    --tertiary: #00676a;
+    --tertiary-container: #008286;
+    --tertiary-fixed: #79f5fb;
+    --surface: #fff7f9;
+    --surface-container-lowest: #ffffff;
+    --surface-container-low: #fbf1f5;
+    --surface-container: #f5ebef;
+    --surface-container-high: #efe6ea;
+    --surface-container-highest: #e9e0e4;
+    --on-surface: #1f1a1d;
+    --outline: #8f6e78;
+    --outline-variant: #e3bdc7;
+  }
+
+  html, body {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    background-color: #0b020c;
+    color: #1f1a1d;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+}
+
+.font-syne {
+  font-family: 'Syne', sans-serif;
+}
+
+.font-jakarta {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.font-space {
+  font-family: 'Space Grotesk', monospace;
+}
+
+.font-pixel, .pixel-font {
+  font-family: 'VT323', monospace;
+}
+
+.font-marker {
+  font-family: 'Permanent Marker', cursive;
+}
+
+/* CRT Screen & Retro Arcade Styles from nailsbysoa.netlify.app */
+.crt-screen {
+  background: radial-gradient(circle, #14071b 0%, #08030b 70%, #020104 100%);
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.crt-vignette {
+  pointer-events: none;
+  z-index: 45;
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 120px #000000f2, inset 0 0 40px #ff007f40;
+}
+
+.crt-flicker {
+  opacity: 0.8;
+  pointer-events: none;
+  z-index: 41;
+  background: #ff007f04;
+  animation: 0.15s infinite flicker;
+  position: absolute;
+  inset: 0;
+}
+
+.scanlines {
+  pointer-events: none;
+  z-index: 40;
+  background: linear-gradient(#12101000 50%, #000000a6 50%) 0 0 / 100% 4px,
+              linear-gradient(90deg, #ff007f08, #00ffff08, #00ff0008);
+  position: absolute;
+  inset: 0;
+}
+
+@keyframes flicker {
+  0% { opacity: 0.77; }
+  50% { opacity: 0.84; }
+  100% { opacity: 0.77; }
+}
+
+@keyframes hyperspaceWarp {
+  0% {
+    transform: scale(1);
+    filter: brightness(1) contrast(1);
+  }
+  30% {
+    transform: scale(0.96);
+    filter: brightness(1.6) contrast(1.4) hue-rotate(45deg);
+  }
+  70% {
+    transform: scale(1.08);
+    filter: brightness(2.2) contrast(1.8) invert(0.2);
+  }
+  100% {
+    transform: scale(1.2);
+    filter: brightness(3);
+    opacity: 0;
+  }
+}
+
+.open-portal-anim {
+  animation: 1.2s cubic-bezier(0.7, 0, 0.3, 1) forwards hyperspaceWarp;
+}
+
+/* Washi Tapes & Pushpins from nailsbysoa.netlify.app */
+.tape-torn-edges {
+  -webkit-mask-image: radial-gradient(circle, #000 85%, transparent 100%);
+  mask-image: radial-gradient(circle, #000 85%, transparent 100%);
+}
+
+.tape-gingham-pink {
+  background-color: #fff;
+  background-image: repeating-linear-gradient(0deg, transparent, transparent 4px, #e0247d73 4px 8px),
+                    repeating-linear-gradient(90deg, transparent, transparent 4px, #e0247d73 4px 8px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.tape-crinkle-metallic {
+  background: linear-gradient(135deg, #ff2a8de6, #9c1d57e6, #000000d9);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.tape-holo-foil {
+  background: linear-gradient(135deg, #ffffffe6 0%, #ff2a8dcc 35%, #9c1d57d9 70%, #000000e6 100%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.washi-tape {
+  background: repeating-linear-gradient(45deg, #ffb6c1b3, #ffb6c1b3 10px, #ffffffd9 10px 20px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* Pushpins */
+.pin-head {
+  z-index: 40;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  top: -10px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), inset 0 2px 2px rgba(255, 255, 255, 0.7);
+}
+
+.pin-pink {
+  background: radial-gradient(circle at 30% 30%, #ff2a8d, #e0247d 70%, #9c1d57);
+}
+
+.pin-yellow {
+  background: radial-gradient(circle at 30% 30%, #fff066, #e6b800 70%, #806600);
+}
+
+.pin-cyan {
+  background: radial-gradient(circle at 30% 30%, #79f5fb, #008286 70%, #004f52);
+}
+
+/* Floating Sparkle Stars */
+.sparkle {
+  color: #ff99dd;
+  pointer-events: none;
+  font-size: 14px;
+  animation: 3.5s ease-in-out infinite alternate sparkleFloat;
+  position: absolute;
+}
+
+@keyframes sparkleFloat {
+  0% { transform: translateY(0px) scale(0.9) rotate(0deg); opacity: 0.4; }
+  50% { transform: translateY(-8px) scale(1.25) rotate(180deg); opacity: 0.95; }
+  100% { transform: translateY(0px) scale(0.9) rotate(360deg); opacity: 0.4; }
+}
+
+/* Press start blinking animation */
+@keyframes pressBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.65; transform: scale(0.98); }
+}
+
+.press-start-badge {
+  animation: pressBlink 1.4s ease-in-out infinite;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
