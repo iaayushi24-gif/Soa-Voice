@@ -12,7 +12,8 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
-app.use(express.json());
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
 // Initialize Google GenAI (Server-Side only) with required User-Agent
 let ai: GoogleGenAI | null = null;
@@ -550,6 +551,94 @@ If the user asks for design inspiration, suggest trending cyber chrome, molten d
     // Graceful fallback ensures user never gets an error
     const fallback = generateFallbackResponse(prompt, language);
     return res.json(fallback);
+  }
+});
+
+// API: Process Voice from Direct Audio Recording (WebM / WAV / MP4)
+app.post('/api/voice/process-audio', async (req, res) => {
+  const { audioBase64, mimeType = 'audio/webm', language = 'en' } = req.body;
+  if (!audioBase64 || typeof audioBase64 !== 'string') {
+    return res.status(400).json({ error: 'Audio base64 data required.' });
+  }
+
+  const cleanBase64 = audioBase64.replace(/^data:audio\/[a-z0-9-+.]+;base64,/, '');
+  const isFr = language === 'fr';
+
+  if (!ai) {
+    const fallback = generateFallbackResponse('coupons', language);
+    return res.json({ ...fallback, userTranscription: 'Voice request' });
+  }
+
+  try {
+    const systemPrompt = `You are "SOA Voice", the fun, cool, affectionate Y2K Barbiecore AI voice assistant for "NailsbySoa" – the high-glam Beverly Hills nail studio.
+Listen to the user's spoken audio. First accurately transcribe what they said, then answer directly in your signature style:
+- You are a fun, super cool, stylish bestie who ALWAYS calls the client "babe" naturally and affectionately (e.g., "Hey babe!", "I got you babe!", "You're all booked babe!").
+- In French: maintain the exact same fun, cool, affectionate vibe, calling her "babe" naturally (e.g. "Coucou babe !", "Je gère babe !", "Trop canon babe !").
+- High energy, hyper-feminine, luxurious, cyber-chic Y2K Barbiecore.
+
+Studio Knowledge:
+- Studio: NailsbySoa, 8840 Wilshire Blvd, Beverly Hills. Artists: Soa (Founder), Naomi (Cyber 3D & Chrome), Chloe (Jelly & Aura).
+- Active Client: Mia Vance (VIP Diamond Starlet).
+- Client Previous Appointment: Last Friday, Oct 31, 2026 with Naomi. Set: "3D Cyber Chrome Stiletto set with dripping silver metal & hot pink accents" ($165.00 paid + $35 tip).
+- Client Loyalty: $34.50 in Sparkle Cash balance. Active coupon code: "BARBIE20" (20% off any full set) and "SPARKLE15" ($15 off refills).
+- Current Limited Edition Drops: "Bratz Cyber Angel Hologram Drop" ($185, 4 slots left), "Barbiecore 2000s Dreamhouse" ($165), "Poison Jelly Neon Aura" ($155).
+- Availability: Today (3:30 PM with Naomi, 5:45 PM with Soa), Tomorrow (11:00 AM Chloe, 1:30 PM Naomi, 4:00 PM Soa), Friday (12:30 PM Naomi).
+- Nail Art Inspiration: Shapes (Stiletto, Coffin, Duck, Almond), Finishes (3D Molten Metal, Mirror Chrome, Jelly Aura, Velvet Cat-Eye, Pierced Charms), Palettes (Cyber Doll, Strawberry Milk Chrome, Toxic Barbie).
+
+LANGUAGE & VOICE INSTRUCTIONS:
+- The user has selected: ${isFr ? 'FRENCH (Français)' : 'ENGLISH'}.
+- Respond in valid JSON matching this schema:
+{
+  "userTranscription": "Accurate transcription of the user's speech in this audio clip (e.g. 'What coupons do I have?' or 'Quels sont mes créneaux ?')",
+  "spokenText": "STRICTLY 1 SHORT SENTENCE in ${isFr ? 'French' : 'English'} calling her 'babe' (under 18 words total). Answer directly and stop immediately.",
+  "displayText": "Rich formatted text in ${isFr ? 'French' : 'English'} for the on-screen card, calling her 'babe' and highlighting prices, coupon codes, and set names in bold.",
+  "intent": "One of: 'book_appointment', 'check_availability', 'past_appointments', 'coupons_discounts', 'limited_edition', 'nail_inspiration', 'general_info'",
+  "actionData": {
+    "type": "past_set" | "coupons" | "limited_editions" | "inspiration" | "availability" | "booking_confirm",
+    "details": {}
+  },
+  "suggestedQuickPrompts": ["3 to 4 short prompts in ${isFr ? 'French' : 'English'} under 6 words each"]
+}
+`;
+
+    const cleanMime = mimeType.split(';')[0] || 'audio/webm';
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-3.8-flash',
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            {
+              inlineData: {
+                mimeType: cleanMime,
+                data: cleanBase64,
+              },
+            },
+            {
+              text: systemPrompt,
+            },
+          ],
+        },
+      ],
+      config: {
+        responseMimeType: 'application/json',
+      },
+    });
+
+    const rawText = response.text || '';
+    let parsed;
+    try {
+      parsed = JSON.parse(rawText);
+    } catch {
+      parsed = generateFallbackResponse('coupons', language);
+    }
+
+    return res.json(parsed);
+  } catch (err: any) {
+    console.error('Error processing audio query with Gemini:', err?.message || err);
+    const fallback = generateFallbackResponse('coupons', language);
+    return res.json({ ...fallback, userTranscription: 'Voice request' });
   }
 });
 

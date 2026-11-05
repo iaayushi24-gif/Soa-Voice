@@ -143,10 +143,14 @@ export const VoiceOrb: React.FC<VoiceOrbProps> = ({
         </span>
       </div>
 
-      <span className="font-space text-[#8f6e78] uppercase tracking-wider text-xs mt-0.5">
+      <span className="font-space text-[#8f6e78] uppercase tracking-wider text-xs mt-0.5 text-center px-4">
         {language === 'fr'
-          ? 'Dis « Hey SOA » ou touche l\'orbe pour parler'
-          : 'Say "Hey SOA" or tap the orb to speak'}
+          ? isListening
+            ? 'Le micro se ferme automatiquement dès que tu as fini'
+            : "Toucher l'orbe pour poser une question"
+          : isListening
+          ? 'Mic closes automatically the moment you stop speaking'
+          : 'Tap orb to ask a question'}
       </span>
     </div>
   );

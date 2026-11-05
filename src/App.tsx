@@ -53,9 +53,24 @@ export default function App() {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isHandsFreeEnabled, setIsHandsFreeEnabled] = useState(true);
+  const [isHandsFreeEnabled, setIsHandsFreeEnabled] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState('');
   const [clientProfile, setClientProfile] = useState<ClientProfile | null>(null);
+
+  const isSpeakingRef = useRef(false);
+  const isProcessingRef = useRef(false);
+
+  // Load client profile from backend
+  useEffect(() => {
+    fetch('/api/client/profile')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.client) {
+          setClientProfile(data.client);
+        }
+      })
+      .catch((err) => console.log('Could not load client profile', err));
+  }, []);
 
   const EN_PROMPTS = [
     'Re-book my last set',
@@ -77,21 +92,74 @@ export default function App() {
 
   const [suggestedPrompts, setSuggestedPrompts] = useState<string[]>(EN_PROMPTS);
 
-  const recognitionRef = useRef<any>(null);
-  const transcriptBufferRef = useRef<string>('');
-  const scrollRef = useRef<HTMLDivElement>(null);
+  // Intelligent Question Completeness & End-of-Speech Analyzer
+  const isQuestionComplete = (transcript: string, lang: 'en' | 'fr'): boolean => {
+    const t = transcript.trim().toLowerCase();
+    if (!t) return false;
 
-  // Load client profile from backend
-  useEffect(() => {
-    fetch('/api/client/profile')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.client) {
-          setClientProfile(data.client);
-        }
-      })
-      .catch((err) => console.log('Could not load client profile', err));
-  }, []);
+    // Terminal punctuation indicates a complete thought
+    if (t.endsWith('?') || t.endsWith('.') || t.endsWith('!')) return true;
+
+    const words = t.split(/\s+/).filter(Boolean);
+    if (words.length < 2) return false;
+
+    const enStarters = [
+      'what', 'how', 'when', 'where', 'why', 'who', 'which',
+      'can i', 'could i', 'can you', 'could you', 'do you', 'do i',
+      'is there', 'are there', 'will you', 'would you', 'tell me',
+      'show me', 'check', 'book', 'rebook', 're-book', 'i want',
+      'i need', 'give me', 'help me', 'how much', 'how many', 'is it',
+      'what is', 'whats', "what's"
+    ];
+
+    const frStarters = [
+      'combien', 'quel', 'quelle', 'quels', 'quelles', 'qu\'est',
+      'est-ce que', 'est ce que', 'puis-je', 'peux-tu', 'pouvez-vous',
+      'as-tu', 'avez-vous', 'y a-t-il', 'comment', 'quand', 'où',
+      'pourquoi', 'qui', 'réserve', 'réserver', 'donne-moi',
+      'montre-moi', 'je veux', 'je voudrais', 'dis-moi', 'vérifie'
+    ];
+
+    const starters = lang === 'fr' ? frStarters : enStarters;
+    const startsWithInquiry = starters.some((s) => t.startsWith(s));
+
+    const keywords = [
+      'set', 'sets', 'appointment', 'booking', 'book', 'refill', 'nails',
+      'coupon', 'coupons', 'discount', 'price', 'cost', 'pay', 'paid',
+      'balance', 'sparkle cash', 'stiletto', 'chrome', 'drop', 'limited edition',
+      'ideas', 'inspiration', 'trending', 'today', 'tomorrow', 'slot',
+      'available', 'naomi', 'refill', 'cash', 'french', 'nailsbysoa',
+      'rendez-vous', 'rdv', 'ongles', 'promo', 'promos', 'réduction',
+      'solde', 'dernier', 'édition limitée', 'tendance', 'créneau', 'dispo'
+    ];
+
+    const hasKeyword = keywords.some((k) => t.includes(k));
+
+    // If starts with inquiry and has topic or at least 3 words
+    if (startsWithInquiry && (hasKeyword || words.length >= 3)) return true;
+
+    // If inquiry contains key studio topic and has 3+ words
+    if (hasKeyword && words.length >= 3) return true;
+
+    // If query is 4 or more words, treat as complete sentence
+    if (words.length >= 4) return true;
+
+    return false;
+  };
+
+  const recognitionRef = useRef<any>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const vadIntervalRef = useRef<any>(null);
+  const speechBufferRef = useRef<string>('');
+  const hasSpokenRef = useRef<boolean>(false);
+  const silenceTimerRef = useRef<any>(null);
+  const idleTimerRef = useRef<any>(null);
+  const isListeningRef = useRef<boolean>(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
@@ -100,99 +168,378 @@ export default function App() {
     }
   }, [messages, isProcessing, view]);
 
-  const isSpeakingRef = useRef(false);
-  const isProcessingRef = useRef(false);
-  const isHandsFreeRef = useRef(true);
+  const clearAllSpeechTimers = () => {
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current);
+      idleTimerRef.current = null;
+    }
+  };
 
-  // Sync ref with state
-  useEffect(() => {
-    isHandsFreeRef.current = isHandsFreeEnabled;
-  }, [isHandsFreeEnabled]);
+  // Completely closes all active microphone hardware & recognition
+  const closeMicrophoneHardware = () => {
+    clearAllSpeechTimers();
 
-  // Setup Web Speech Recognition with strict echo isolation
-  useEffect(() => {
-    if (typeof window !== 'undefined' && view === 'studio') {
-      const SpeechRecognition =
-        (window as any).SpeechRecognition ||
-        (window as any).webkitSpeechRecognition;
+    if (vadIntervalRef.current) {
+      clearInterval(vadIntervalRef.current);
+      vadIntervalRef.current = null;
+    }
 
-      if (SpeechRecognition) {
+    if (audioContextRef.current) {
+      try {
+        audioContextRef.current.close();
+      } catch (e) {}
+      audioContextRef.current = null;
+    }
+
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch (e) {}
+    }
+
+    if (mediaStreamRef.current) {
+      try {
+        mediaStreamRef.current.getTracks().forEach((track) => {
+          track.stop();
+        });
+      } catch (e) {}
+      mediaStreamRef.current = null;
+    }
+
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {
+        try {
+          recognitionRef.current.abort();
+        } catch (err) {}
+      }
+      recognitionRef.current = null;
+    }
+  };
+
+  // Stops listening cleanly and immediately routes to AI
+  const stopListeningAndProcess = async () => {
+    if (!isListeningRef.current) return;
+    setIsListening(false);
+    isListeningRef.current = false;
+
+    const queryText = speechBufferRef.current.trim();
+    const chunks = [...audioChunksRef.current];
+    const recorder = mediaRecorderRef.current;
+
+    closeMicrophoneHardware();
+    setInterimTranscript('');
+    speechBufferRef.current = '';
+
+    // If client spoke and Web Speech produced a transcript, process text query
+    if (queryText.length >= 2) {
+      handleFinalSpeech(queryText);
+      return;
+    }
+
+    // Fallback: If Web Speech produced no text (e.g. browser restrictions), send direct audio to Gemini!
+    if (hasSpokenRef.current && chunks.length > 0) {
+      const mime = recorder?.mimeType || 'audio/webm';
+      const audioBlob = new Blob(chunks, { type: mime });
+      if (audioBlob.size > 1500) {
+        sendAudioBlobQuery(audioBlob, mime);
+      }
+    }
+  };
+
+  // Starts a fresh, reliable microphone session
+  const startListening = async () => {
+    // 1. If Soa is speaking or audio playing, stop immediately
+    audioService.stopSpeaking();
+    setIsSpeaking(false);
+    isSpeakingRef.current = false;
+
+    // Reset state & buffers
+    speechBufferRef.current = '';
+    hasSpokenRef.current = false;
+    audioChunksRef.current = [];
+    setInterimTranscript('');
+    clearAllSpeechTimers();
+
+    // 2. Request microphone stream (triggers browser Allow Mic prompt if needed)
+    let stream: MediaStream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
+      mediaStreamRef.current = stream;
+    } catch (err: any) {
+      console.warn('Microphone permission request error:', err);
+      alert(
+        language === 'fr'
+          ? "Impossible d'accéder au microphone. Veuillez autoriser l'accès au micro dans les paramètres de votre navigateur."
+          : 'Could not access microphone. Please allow microphone permissions in your browser bar.'
+      );
+      return;
+    }
+
+    // Play tactile mic start chime
+    audioService.playMicStart();
+    setIsListening(true);
+    isListeningRef.current = true;
+
+    // 3. Setup MediaRecorder for universal backup audio processing
+    try {
+      const mime =
+        typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported('audio/webm')
+          ? 'audio/webm'
+          : typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported('audio/mp4')
+          ? 'audio/mp4'
+          : '';
+      const recorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          audioChunksRef.current.push(e.data);
+        }
+      };
+      recorder.start(100);
+      mediaRecorderRef.current = recorder;
+    } catch (e) {
+      console.warn('MediaRecorder init err', e);
+    }
+
+    // 4. Setup Web Audio VAD (Voice Activity Detection)
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioCtx) {
+        const audioCtx = new AudioCtx();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const source = audioCtx.createMediaStreamSource(stream);
+        const analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 512;
+        source.connect(analyser);
+        audioContextRef.current = audioCtx;
+        analyserRef.current = analyser;
+
+        const buffer = new Uint8Array(analyser.frequencyBinCount);
+        let consecutiveSilentFrames = 0;
+
+        vadIntervalRef.current = setInterval(() => {
+          if (!isListeningRef.current) return;
+          analyser.getByteTimeDomainData(buffer);
+
+          let sumSquares = 0;
+          for (let i = 0; i < buffer.length; i++) {
+            const normalized = (buffer[i] - 128) / 128;
+            sumSquares += normalized * normalized;
+          }
+          const rms = Math.sqrt(sumSquares / buffer.length);
+
+          // Audio level exceeds background floor -> user is speaking
+          if (rms > 0.02) {
+            hasSpokenRef.current = true;
+            consecutiveSilentFrames = 0;
+            if (idleTimerRef.current) {
+              clearTimeout(idleTimerRef.current);
+              idleTimerRef.current = null;
+            }
+          } else if (hasSpokenRef.current) {
+            // User was speaking and is now silent
+            consecutiveSilentFrames++;
+            // 9 frames (approx 900ms) of silence after speech -> auto-close & answer
+            if (consecutiveSilentFrames >= 9) {
+              consecutiveSilentFrames = 0;
+              stopListeningAndProcess();
+            }
+          }
+        }, 100);
+      }
+    } catch (e) {
+      console.warn('AudioContext VAD err', e);
+    }
+
+    // 5. Setup Fresh SpeechRecognition instance for real-time text streaming
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+      try {
         const recognition = new SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = true;
         recognition.lang = language === 'fr' ? 'fr-FR' : 'en-US';
-
-        recognition.onstart = () => {
-          setIsListening(true);
-        };
+        recognition.maxAlternatives = 1;
 
         recognition.onresult = (event: any) => {
-          // STRICT ECHO PREVENTION: Discard all audio if Soa is speaking, thinking, or in cooldown
-          if (isSpeakingRef.current || isProcessingRef.current) {
-            return;
+          if (isSpeakingRef.current || isProcessingRef.current) return;
+
+          hasSpokenRef.current = true;
+          if (idleTimerRef.current) {
+            clearTimeout(idleTimerRef.current);
+            idleTimerRef.current = null;
           }
 
-          let currentInterim = '';
+          let latestSpeech = '';
           for (let i = event.resultIndex; i < event.results.length; ++i) {
             const transcript = event.results[i][0].transcript;
-            if (event.results[i].isFinal) {
-              transcriptBufferRef.current += ' ' + transcript;
-              const text = transcriptBufferRef.current.trim();
-              transcriptBufferRef.current = '';
-              currentInterim = '';
-              handleFinalSpeech(text);
-            } else {
-              currentInterim += transcript;
-            }
+            latestSpeech += ' ' + transcript;
           }
-          setInterimTranscript(currentInterim);
+
+          const combined = (speechBufferRef.current + ' ' + latestSpeech).trim();
+          speechBufferRef.current = combined;
+          setInterimTranscript(combined);
+
+          if (silenceTimerRef.current) {
+            clearTimeout(silenceTimerRef.current);
+            silenceTimerRef.current = null;
+          }
+
+          const complete = isQuestionComplete(combined, language);
+          const silenceDelay = complete ? 750 : 1300;
+
+          silenceTimerRef.current = setTimeout(() => {
+            stopListeningAndProcess();
+          }, silenceDelay);
         };
 
         recognition.onerror = (event: any) => {
-          if (event.error === 'not-allowed') {
-            setIsListening(false);
-          }
+          console.log('SpeechRecognition notice:', event.error);
         };
 
         recognition.onend = () => {
-          // Only auto-restart if hands-free is enabled AND Soa is totally quiet
-          if (
-            isHandsFreeRef.current &&
-            !isSpeakingRef.current &&
-            !isProcessingRef.current &&
-            view === 'studio'
-          ) {
-            try {
-              recognition.start();
-            } catch (e) {
-              setIsListening(false);
-            }
-          } else {
-            setIsListening(false);
+          // If browser engine stopped early but user was speaking, finalize query
+          if (isListeningRef.current && hasSpokenRef.current && speechBufferRef.current.trim().length >= 3) {
+            stopListeningAndProcess();
           }
         };
 
+        recognition.start();
         recognitionRef.current = recognition;
+      } catch (e) {
+        console.warn('SpeechRecognition instantiation err', e);
       }
     }
 
-    return () => {
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.abort();
-        } catch (e) {}
+    // 6. Idle Watchdog: 5.5s timeout if no sound is made after opening mic
+    idleTimerRef.current = setTimeout(() => {
+      if (!hasSpokenRef.current && !speechBufferRef.current.trim()) {
+        closeMicrophoneHardware();
+        setIsListening(false);
+        isListeningRef.current = false;
+      }
+    }, 5500);
+  };
+
+  // Toggle microphone on tap
+  const toggleMic = () => {
+    // If Soa is speaking, tapping immediately silences her
+    if (isSpeaking || isSpeakingRef.current) {
+      audioService.stopSpeaking();
+      setIsSpeaking(false);
+      isSpeakingRef.current = false;
+      return;
+    }
+
+    if (isListening || isListeningRef.current) {
+      stopListeningAndProcess();
+    } else {
+      startListening();
+    }
+  };
+
+  // Send direct audio blob to Gemini for full-duplex understanding
+  const sendAudioBlobQuery = async (audioBlob: Blob, mimeType: string) => {
+    isProcessingRef.current = true;
+    setIsProcessing(true);
+
+    const reader = new FileReader();
+    reader.readAsDataURL(audioBlob);
+    reader.onloadend = async () => {
+      const base64Audio = reader.result as string;
+
+      const userMsg: VoiceMessage = {
+        id: `user-${Date.now()}`,
+        sender: 'user',
+        text: language === 'fr' ? '🎙️ Question vocale...' : '🎙️ Voice inquiry...',
+        timestamp: 'Just now',
+      };
+      setMessages((prev) => [...prev, userMsg]);
+
+      try {
+        const res = await fetch('/api/voice/process-audio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ audioBase64: base64Audio, mimeType, language }),
+        });
+
+        const data = await res.json();
+        isProcessingRef.current = false;
+        setIsProcessing(false);
+
+        // Update transcribed user message if available
+        if (data.userTranscription) {
+          setMessages((prev) =>
+            prev.map((m) => (m.id === userMsg.id ? { ...m, text: data.userTranscription } : m))
+          );
+        }
+
+        const soaMsg: VoiceMessage = {
+          id: `soa-${Date.now()}`,
+          sender: 'soa',
+          text: data.displayText || data.spokenText || (language === 'fr' ? "Je m'en occupe, babe !" : "I'm on it, babe!"),
+          spokenText: data.spokenText || data.displayText,
+          timestamp: 'Just now',
+          durationSeconds: Math.max(4, Math.min(12, Math.round((data.spokenText?.length || 40) / 14))),
+          intent: data.intent,
+          actionData: data.actionData,
+        };
+
+        setMessages((prev) => [...prev, soaMsg]);
+
+        if (data.suggestedQuickPrompts && Array.isArray(data.suggestedQuickPrompts)) {
+          setSuggestedPrompts(data.suggestedQuickPrompts);
+        }
+
+        if (soaMsg.spokenText) {
+          isSpeakingRef.current = true;
+          setIsSpeaking(true);
+          audioService.speak(
+            soaMsg.spokenText,
+            {
+              onEnd: () => {
+                isSpeakingRef.current = false;
+                setIsSpeaking(false);
+              },
+              onError: () => {
+                isSpeakingRef.current = false;
+                setIsSpeaking(false);
+              },
+            },
+            language
+          );
+        }
+      } catch (err) {
+        console.error('Error in audio query:', err);
+        isProcessingRef.current = false;
+        setIsProcessing(false);
       }
     };
-  }, [view, language]);
+  };
 
   const toggleLanguage = (newLang: 'en' | 'fr') => {
+    closeMicrophoneHardware();
+    setIsListening(false);
+    isListeningRef.current = false;
     setLanguage(newLang);
-    if (recognitionRef.current) {
-      recognitionRef.current.lang = newLang === 'fr' ? 'fr-FR' : 'en-US';
-    }
     setSuggestedPrompts(newLang === 'fr' ? FR_PROMPTS : EN_PROMPTS);
 
-    // Announce the language switch cleanly with Stitch voice
     const switchMsg: VoiceMessage = {
       id: `soa-lang-${Date.now()}`,
       sender: 'soa',
@@ -217,18 +564,6 @@ export default function App() {
         onEnd: () => {
           isSpeakingRef.current = false;
           setIsSpeaking(false);
-          setTimeout(() => {
-            if (
-              isHandsFreeRef.current &&
-              !isSpeakingRef.current &&
-              !isProcessingRef.current &&
-              recognitionRef.current
-            ) {
-              try {
-                recognitionRef.current.start();
-              } catch (e) {}
-            }
-          }, 1400);
         },
         onError: () => {
           isSpeakingRef.current = false;
@@ -240,52 +575,25 @@ export default function App() {
   };
 
   const handleFinalSpeech = (rawText: string) => {
-    // If speaking or processing, drop speech completely
     if (isSpeakingRef.current || isProcessingRef.current) {
       return;
     }
     let clean = rawText.trim();
-    if (!clean || clean.length < 3) return;
+    if (!clean || clean.length < 2) return;
 
     if (clean.toLowerCase().includes('hey soa') || clean.toLowerCase().includes('soa')) {
       clean = clean.replace(/hey soa/gi, '').replace(/soa/gi, '').trim();
       if (!clean) {
-        sendVoiceQuery(language === 'fr' ? 'Bonjour ! Comment peux-tu m\'aider aujourd\'hui ?' : 'Hello! What can you help me with today?');
+        sendVoiceQuery(
+          language === 'fr'
+            ? "Bonjour ! Comment peux-tu m'aider aujourd'hui ?"
+            : 'Hello! What can you help me with today?'
+        );
         return;
       }
     }
 
     sendVoiceQuery(clean);
-  };
-
-  const toggleMic = () => {
-    // If Soa is speaking, tapping immediately stops her!
-    if (isSpeaking || isSpeakingRef.current) {
-      audioService.stopSpeaking();
-      setIsSpeaking(false);
-      isSpeakingRef.current = false;
-      return;
-    }
-
-    if (!recognitionRef.current) {
-      alert(language === 'fr' ? 'La reconnaissance vocale n\'est pas supportée sur ce navigateur.' : 'Speech Recognition is not supported on this browser. You can use keyboard input!');
-      return;
-    }
-
-    if (isListening) {
-      try {
-        recognitionRef.current.abort();
-      } catch (e) {}
-      setIsListening(false);
-    } else {
-      audioService.playMicStart();
-      try {
-        recognitionRef.current.start();
-        setIsListening(true);
-      } catch (e) {
-        console.warn('Mic start err', e);
-      }
-    }
   };
 
   const sendVoiceQuery = async (queryText: string) => {
@@ -296,15 +604,12 @@ export default function App() {
     setIsSpeaking(false);
     isSpeakingRef.current = false;
 
-    // 2. Immediately stop recognition so microphone doesn't pick up audio
+    // 2. Immediately stop recognition and clear timers so microphone is closed
+    closeMicrophoneHardware();
+    setIsListening(false);
+    isListeningRef.current = false;
     isProcessingRef.current = true;
     setIsProcessing(true);
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current.abort();
-      } catch (e) {}
-      setIsListening(false);
-    }
 
     const userMsg: VoiceMessage = {
       id: `user-${Date.now()}`,
@@ -342,7 +647,7 @@ export default function App() {
         setSuggestedPrompts(data.suggestedQuickPrompts);
       }
 
-      // Speak answer once and cleanly stop!
+      // Speak answer once and cleanly stop! Mic remains closed until user taps again
       if (soaMsg.spokenText) {
         isSpeakingRef.current = true;
         setIsSpeaking(true);
@@ -353,19 +658,7 @@ export default function App() {
             onEnd: () => {
               isSpeakingRef.current = false;
               setIsSpeaking(false);
-              // Cooldown delay of 1.4s so speaker reverberation won't re-trigger the mic
-              setTimeout(() => {
-                if (
-                  isHandsFreeRef.current &&
-                  !isSpeakingRef.current &&
-                  !isProcessingRef.current &&
-                  recognitionRef.current
-                ) {
-                  try {
-                    recognitionRef.current.start();
-                  } catch (e) {}
-                }
-              }, 1400);
+              // The mic remains closed! The user taps the orb when they want to speak again.
             },
             onError: () => {
               isSpeakingRef.current = false;
@@ -587,19 +880,23 @@ export default function App() {
             statusText={
               language === 'fr'
                 ? isListening
-                  ? 'SOA vous écoute...'
+                  ? interimTranscript
+                    ? `« ${interimTranscript} »`
+                    : "SOA vous écoute... Parlez"
                   : isProcessing
-                  ? 'SOA consulte l\'atelier...'
+                  ? "SOA consulte l'atelier..."
                   : isSpeaking
-                  ? 'SOA parle en direct...'
-                  : 'Dis « Hey SOA » ou touche l\'orbe'
+                  ? "SOA vous répond..."
+                  : "Toucher l'orbe pour parler"
                 : isListening
-                ? 'SOA is listening to you...'
+                ? interimTranscript
+                  ? `"${interimTranscript}"`
+                  : "SOA is listening... Speak now"
                 : isProcessing
-                ? 'SOA is consulting atelier books...'
+                ? "SOA is consulting atelier books..."
                 : isSpeaking
-                ? 'SOA is speaking live...'
-                : 'Say "Hey SOA" or tap the orb'
+                ? "SOA is answering you..."
+                : "Tap orb to speak"
             }
           />
 

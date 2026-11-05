@@ -55,15 +55,13 @@ export const HandsFreeBar: React.FC<HandsFreeBarProps> = ({
           <div className="flex flex-col min-w-0 flex-1">
             <span className="font-syne text-xs font-bold text-[#1f1a1d] truncate">
               {isListening
-                ? interimTranscript || (language === 'fr' ? 'À l\'écoute de votre voix...' : 'Listening to your voice...')
-                : isHandsFreeEnabled
-                ? (language === 'fr' ? 'Mode mains libres actif' : 'Hands-free mode active')
-                : (language === 'fr' ? 'Touche le micro ou dis « Hey SOA »' : 'Tap mic or say "Hey SOA"')}
+                ? interimTranscript || (language === 'fr' ? "À l'écoute... Parlez maintenant" : 'Listening... Speak now')
+                : (language === 'fr' ? 'Micro fermé • Toucher pour parler' : 'Microphone closed • Tap to speak')}
             </span>
             <span className="font-space text-[#8f6e78] text-[10px] truncate">
               {isListening
-                ? (language === 'fr' ? 'Parle de tes ongles, rendez-vous ou promos' : 'Speak naturally about nails, appointments, or deals')
-                : (language === 'fr' ? 'Dis « Hey SOA » à tout moment en mains libres' : 'Say "Hey SOA" anytime hands-free')}
+                ? (language === 'fr' ? 'Le micro se coupe automatiquement dès que tu as fini' : 'Mic cuts automatically the moment you stop speaking')
+                : (language === 'fr' ? 'Détection intelligente de fin de question active' : 'Intelligent question-completion detection active')}
             </span>
           </div>
         </div>
@@ -77,17 +75,13 @@ export const HandsFreeBar: React.FC<HandsFreeBarProps> = ({
               <span className="w-1 h-2 bg-[#b40065] rounded-full animate-bounce" style={{ animationDelay: '0.15s' }} />
             </div>
           ) : (
-            <button
-              onClick={onToggleHandsFree}
-              title="Toggle Hands-Free Mode"
-              className={`font-space text-[10px] font-bold px-2 py-1 rounded-full transition-all cursor-pointer ${
-                isHandsFreeEnabled
-                  ? 'bg-[#79f5fb] text-[#002021] border border-[#00676a]/20 shadow-xs'
-                  : 'bg-white text-[#8f6e78] border border-[#e3bdc7]'
-              }`}
+            <div
+              className="font-space text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#79f5fb]/80 text-[#002021] border border-[#00676a]/20 shadow-xs flex items-center gap-1"
+              title="Intelligent Voice Activity Detection is active"
             >
-              {isHandsFreeEnabled ? '⚡ AUTO' : (language === 'fr' ? 'MANUEL' : 'TAP ONLY')}
-            </button>
+              <span className="text-[9px]">⚡</span>
+              <span>AUTO-CUT</span>
+            </div>
           )}
 
           {/* Quick keyboard icon toggle */}
