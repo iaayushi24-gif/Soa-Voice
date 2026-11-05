@@ -22,9 +22,9 @@ export default function App() {
       id: 'msg-init-soa',
       sender: 'soa',
       text:
-        'Hey babe! Last Friday you got the **3D Cyber Chrome Stiletto set** with Naomi ($165). You have **$34.50 in Sparkle Cash** & code **BARBIE20** active! Want me to book your refill or suggest trending jelly aura ideas, babe?',
+        'Hey babe! Last Friday you got the **Gel-X Mix&Match Set** with Naomi (45.00 €). You have **15.00 € in Sparkle Cash** & code **BARBIE20** active! Want to see our Gel-X & Gainage prices or book your next set, babe?',
       spokenText:
-        'Hey babe! Your last set was 3D Cyber Chrome with Naomi for 165 dollars. You got 34 dollars in Sparkle Cash!',
+        'Hey babe! Your last set was the Gel-X Mix&Match with Naomi for 45 euros. You have 15 euros in Sparkle Cash!',
       timestamp: 'Just now',
       durationSeconds: 5,
       intent: 'past_appointments',
@@ -35,16 +35,16 @@ export default function App() {
           date: 'Last Friday, Oct 31, 2026',
           time: '3:00 PM',
           technician: 'Naomi',
-          set: '3D Cyber Chrome Stiletto set with dripping silver metal & hot pink accents',
+          set: 'Gel-X Mix&Match Set (Chaque ongle est différent)',
           shape: 'Long Stiletto',
           colors: ['Hyper Metallic Silver Chrome', 'Electric Magenta Pink Accent'],
           addOns: ['2x Molten Liquid Drip Accents', 'Swarovski Star Decals'],
-          amountPaid: 165.0,
-          tip: 35.0,
-          total: 200.0,
-          pointsEarned: 165,
+          amountPaid: 45.0,
+          tip: 10.0,
+          total: 55.0,
+          pointsEarned: 45,
         },
-        sparkleCash: 34.5,
+        sparkleCash: 15.0,
       },
     },
   ]);
@@ -73,21 +73,21 @@ export default function App() {
   }, []);
 
   const EN_PROMPTS = [
-    'Re-book my last set',
+    'Pricing for Gel-X & Gainage',
+    'How much for a French set?',
+    'Re-book my last set (45€)',
     'What coupons do I have?',
-    'Trending cyber chrome',
-    'Limited edition drops?',
     'Check availability today',
-    'Need design inspiration',
+    'Trending cyber chrome',
   ];
 
   const FR_PROMPTS = [
-    'Reprendre mon dernier set',
+    'Tarifs Gel-X & Gainage',
+    'Combien pour un French ?',
+    'Reprendre mon dernier set (45€)',
     'Quels sont mes coupons ?',
-    'Tendances cyber chrome',
-    'Drops édition limitée',
     'Créneaux disponibles',
-    'Idées de nail art',
+    'Tendances cyber chrome',
   ];
 
   const [suggestedPrompts, setSuggestedPrompts] = useState<string[]>(EN_PROMPTS);
@@ -147,18 +147,13 @@ export default function App() {
     return false;
   };
 
+  const [micError, setMicError] = useState<string | null>(null);
   const recognitionRef = useRef<any>(null);
-  const mediaStreamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const vadIntervalRef = useRef<any>(null);
-  const speechBufferRef = useRef<string>('');
-  const hasSpokenRef = useRef<boolean>(false);
-  const silenceTimerRef = useRef<any>(null);
-  const idleTimerRef = useRef<any>(null);
   const isListeningRef = useRef<boolean>(false);
+  const finalTranscriptRef = useRef<string>('');
+  const fallbackTimeoutRef = useRef<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom when new messages arrive
@@ -168,46 +163,11 @@ export default function App() {
     }
   }, [messages, isProcessing, view]);
 
-  const clearAllSpeechTimers = () => {
-    if (silenceTimerRef.current) {
-      clearTimeout(silenceTimerRef.current);
-      silenceTimerRef.current = null;
-    }
-    if (idleTimerRef.current) {
-      clearTimeout(idleTimerRef.current);
-      idleTimerRef.current = null;
-    }
-  };
-
-  // Completely closes all active microphone hardware & recognition
-  const closeMicrophoneHardware = () => {
-    clearAllSpeechTimers();
-
-    if (vadIntervalRef.current) {
-      clearInterval(vadIntervalRef.current);
-      vadIntervalRef.current = null;
-    }
-
-    if (audioContextRef.current) {
-      try {
-        audioContextRef.current.close();
-      } catch (e) {}
-      audioContextRef.current = null;
-    }
-
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      try {
-        mediaRecorderRef.current.stop();
-      } catch (e) {}
-    }
-
-    if (mediaStreamRef.current) {
-      try {
-        mediaStreamRef.current.getTracks().forEach((track) => {
-          track.stop();
-        });
-      } catch (e) {}
-      mediaStreamRef.current = null;
+  // Cleanly stops all active listeners & media
+  const stopAllListening = () => {
+    if (fallbackTimeoutRef.current) {
+      clearTimeout(fallbackTimeoutRef.current);
+      fallbackTimeoutRef.current = null;
     }
 
     if (recognitionRef.current) {
@@ -220,221 +180,172 @@ export default function App() {
       }
       recognitionRef.current = null;
     }
-  };
 
-  // Stops listening cleanly and immediately routes to AI
-  const stopListeningAndProcess = async () => {
-    if (!isListeningRef.current) return;
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch (e) {}
+    }
+
     setIsListening(false);
     isListeningRef.current = false;
-
-    const queryText = speechBufferRef.current.trim();
-    const chunks = [...audioChunksRef.current];
-    const recorder = mediaRecorderRef.current;
-
-    closeMicrophoneHardware();
-    setInterimTranscript('');
-    speechBufferRef.current = '';
-
-    // If client spoke and Web Speech produced a transcript, process text query
-    if (queryText.length >= 2) {
-      handleFinalSpeech(queryText);
-      return;
-    }
-
-    // Fallback: If Web Speech produced no text (e.g. browser restrictions), send direct audio to Gemini!
-    if (hasSpokenRef.current && chunks.length > 0) {
-      const mime = recorder?.mimeType || 'audio/webm';
-      const audioBlob = new Blob(chunks, { type: mime });
-      if (audioBlob.size > 1500) {
-        sendAudioBlobQuery(audioBlob, mime);
-      }
-    }
   };
 
-  // Starts a fresh, reliable microphone session
-  const startListening = async () => {
-    // 1. If Soa is speaking or audio playing, stop immediately
+  // Starts microphone listening with native Web Speech first, then MediaRecorder fallback
+  const startListening = () => {
+    // 1. Immediately silence any active audio
     audioService.stopSpeaking();
     setIsSpeaking(false);
     isSpeakingRef.current = false;
-
-    // Reset state & buffers
-    speechBufferRef.current = '';
-    hasSpokenRef.current = false;
-    audioChunksRef.current = [];
+    setMicError(null);
     setInterimTranscript('');
-    clearAllSpeechTimers();
+    finalTranscriptRef.current = '';
 
-    // 2. Request microphone stream (triggers browser Allow Mic prompt if needed)
-    let stream: MediaStream;
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
-      });
-      mediaStreamRef.current = stream;
-    } catch (err: any) {
-      console.warn('Microphone permission request error:', err);
-      alert(
-        language === 'fr'
-          ? "Impossible d'accéder au microphone. Veuillez autoriser l'accès au micro dans les paramètres de votre navigateur."
-          : 'Could not access microphone. Please allow microphone permissions in your browser bar.'
-      );
-      return;
-    }
-
-    // Play tactile mic start chime
-    audioService.playMicStart();
-    setIsListening(true);
-    isListeningRef.current = true;
-
-    // 3. Setup MediaRecorder for universal backup audio processing
-    try {
-      const mime =
-        typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported('audio/webm')
-          ? 'audio/webm'
-          : typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported('audio/mp4')
-          ? 'audio/mp4'
-          : '';
-      const recorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
-      recorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) {
-          audioChunksRef.current.push(e.data);
-        }
-      };
-      recorder.start(100);
-      mediaRecorderRef.current = recorder;
-    } catch (e) {
-      console.warn('MediaRecorder init err', e);
-    }
-
-    // 4. Setup Web Audio VAD (Voice Activity Detection)
-    try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (AudioCtx) {
-        const audioCtx = new AudioCtx();
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
-        const source = audioCtx.createMediaStreamSource(stream);
-        const analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 512;
-        source.connect(analyser);
-        audioContextRef.current = audioCtx;
-        analyserRef.current = analyser;
-
-        const buffer = new Uint8Array(analyser.frequencyBinCount);
-        let consecutiveSilentFrames = 0;
-
-        vadIntervalRef.current = setInterval(() => {
-          if (!isListeningRef.current) return;
-          analyser.getByteTimeDomainData(buffer);
-
-          let sumSquares = 0;
-          for (let i = 0; i < buffer.length; i++) {
-            const normalized = (buffer[i] - 128) / 128;
-            sumSquares += normalized * normalized;
-          }
-          const rms = Math.sqrt(sumSquares / buffer.length);
-
-          // Audio level exceeds background floor -> user is speaking
-          if (rms > 0.02) {
-            hasSpokenRef.current = true;
-            consecutiveSilentFrames = 0;
-            if (idleTimerRef.current) {
-              clearTimeout(idleTimerRef.current);
-              idleTimerRef.current = null;
-            }
-          } else if (hasSpokenRef.current) {
-            // User was speaking and is now silent
-            consecutiveSilentFrames++;
-            // 9 frames (approx 900ms) of silence after speech -> auto-close & answer
-            if (consecutiveSilentFrames >= 9) {
-              consecutiveSilentFrames = 0;
-              stopListeningAndProcess();
-            }
-          }
-        }, 100);
-      }
-    } catch (e) {
-      console.warn('AudioContext VAD err', e);
-    }
-
-    // 5. Setup Fresh SpeechRecognition instance for real-time text streaming
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
       (window as any).webkitSpeechRecognition;
 
+    // A) PRIMARY: Web Speech API (Native browser speech engine)
     if (SpeechRecognition) {
       try {
+        stopAllListening();
+
         const recognition = new SpeechRecognition();
-        recognition.continuous = true;
+        // continuous = false ensures the browser automatically closes mic when user stops speaking!
+        recognition.continuous = false;
         recognition.interimResults = true;
         recognition.lang = language === 'fr' ? 'fr-FR' : 'en-US';
         recognition.maxAlternatives = 1;
 
+        recognition.onstart = () => {
+          setIsListening(true);
+          isListeningRef.current = true;
+          audioService.playMicStart();
+        };
+
         recognition.onresult = (event: any) => {
           if (isSpeakingRef.current || isProcessingRef.current) return;
 
-          hasSpokenRef.current = true;
-          if (idleTimerRef.current) {
-            clearTimeout(idleTimerRef.current);
-            idleTimerRef.current = null;
-          }
-
-          let latestSpeech = '';
+          let interim = '';
           for (let i = event.resultIndex; i < event.results.length; ++i) {
             const transcript = event.results[i][0].transcript;
-            latestSpeech += ' ' + transcript;
+            if (event.results[i].isFinal) {
+              finalTranscriptRef.current += ' ' + transcript;
+            } else {
+              interim += transcript;
+            }
           }
 
-          const combined = (speechBufferRef.current + ' ' + latestSpeech).trim();
-          speechBufferRef.current = combined;
-          setInterimTranscript(combined);
+          const currentText = (finalTranscriptRef.current + ' ' + interim).trim();
+          setInterimTranscript(currentText);
+        };
 
-          if (silenceTimerRef.current) {
-            clearTimeout(silenceTimerRef.current);
-            silenceTimerRef.current = null;
-          }
-
-          const complete = isQuestionComplete(combined, language);
-          const silenceDelay = complete ? 750 : 1300;
-
-          silenceTimerRef.current = setTimeout(() => {
-            stopListeningAndProcess();
-          }, silenceDelay);
+        recognition.onspeechend = () => {
+          // Native Voice Activity: Client stopped speaking -> finalize
+          try {
+            recognition.stop();
+          } catch (e) {}
         };
 
         recognition.onerror = (event: any) => {
-          console.log('SpeechRecognition notice:', event.error);
+          console.warn('SpeechRecognition error:', event.error);
+          if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+            setMicError(
+              language === 'fr'
+                ? "Microphone bloqué par le navigateur. Veuillez autoriser l'accès au micro dans votre barre d'adresse."
+                : 'Microphone permission denied. Please allow microphone access in your browser address bar.'
+            );
+          }
+          setIsListening(false);
+          isListeningRef.current = false;
         };
 
         recognition.onend = () => {
-          // If browser engine stopped early but user was speaking, finalize query
-          if (isListeningRef.current && hasSpokenRef.current && speechBufferRef.current.trim().length >= 3) {
-            stopListeningAndProcess();
+          setIsListening(false);
+          isListeningRef.current = false;
+          setInterimTranscript('');
+
+          const captured = finalTranscriptRef.current.trim();
+          finalTranscriptRef.current = '';
+
+          if (captured && captured.length >= 2) {
+            handleFinalSpeech(captured);
           }
         };
 
         recognition.start();
         recognitionRef.current = recognition;
-      } catch (e) {
-        console.warn('SpeechRecognition instantiation err', e);
+        return;
+      } catch (err: any) {
+        console.warn('Web Speech API failed, trying fallback:', err);
       }
     }
 
-    // 6. Idle Watchdog: 5.5s timeout if no sound is made after opening mic
-    idleTimerRef.current = setTimeout(() => {
-      if (!hasSpokenRef.current && !speechBufferRef.current.trim()) {
-        closeMicrophoneHardware();
-        setIsListening(false);
-        isListeningRef.current = false;
-      }
-    }, 5500);
+    // B) FALLBACK: MediaRecorder for browsers without Web Speech (Firefox, etc.)
+    if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
+      navigator.mediaDevices
+        .getUserMedia({ audio: true })
+        .then((stream) => {
+          stopAllListening();
+          audioService.playMicStart();
+          setIsListening(true);
+          isListeningRef.current = true;
+          audioChunksRef.current = [];
+
+          const mime =
+            typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported('audio/webm')
+              ? 'audio/webm'
+              : '';
+          const recorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+
+          recorder.ondataavailable = (e) => {
+            if (e.data && e.data.size > 0) {
+              audioChunksRef.current.push(e.data);
+            }
+          };
+
+          recorder.onstop = () => {
+            stream.getTracks().forEach((t) => t.stop());
+            setIsListening(false);
+            isListeningRef.current = false;
+
+            if (audioChunksRef.current.length > 0) {
+              const audioBlob = new Blob(audioChunksRef.current, {
+                type: recorder.mimeType || 'audio/webm',
+              });
+              if (audioBlob.size > 800) {
+                sendAudioBlobQuery(audioBlob, recorder.mimeType || 'audio/webm');
+              }
+            }
+          };
+
+          recorder.start();
+          mediaRecorderRef.current = recorder;
+
+          // Auto-stop fallback after 5 seconds
+          fallbackTimeoutRef.current = setTimeout(() => {
+            if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+              mediaRecorderRef.current.stop();
+            }
+          }, 5000);
+        })
+        .catch((err) => {
+          console.warn('Microphone getUserMedia error:', err);
+          setIsListening(false);
+          isListeningRef.current = false;
+          setMicError(
+            language === 'fr'
+              ? "Microphone inaccessible. Veuillez autoriser le micro ou cliquer sur les boutons ci-dessous."
+              : 'Microphone inaccessible. Please allow microphone access or click a prompt below.'
+          );
+        });
+    } else {
+      setMicError(
+        language === 'fr'
+          ? "La reconnaissance vocale n'est pas supportée sur ce navigateur. Utilisez les boutons ci-dessous."
+          : 'Speech recognition is not supported on this browser. Use the prompt chips below.'
+      );
+    }
   };
 
   // Toggle microphone on tap
@@ -448,7 +359,7 @@ export default function App() {
     }
 
     if (isListening || isListeningRef.current) {
-      stopListeningAndProcess();
+      stopAllListening();
     } else {
       startListening();
     }
@@ -534,7 +445,7 @@ export default function App() {
   };
 
   const toggleLanguage = (newLang: 'en' | 'fr') => {
-    closeMicrophoneHardware();
+    stopAllListening();
     setIsListening(false);
     isListeningRef.current = false;
     setLanguage(newLang);
@@ -605,7 +516,7 @@ export default function App() {
     isSpeakingRef.current = false;
 
     // 2. Immediately stop recognition and clear timers so microphone is closed
-    closeMicrophoneHardware();
+    stopAllListening();
     setIsListening(false);
     isListeningRef.current = false;
     isProcessingRef.current = true;
@@ -865,7 +776,7 @@ export default function App() {
                 {language === 'fr' ? 'Solde Sparkle Cash :' : 'Sparkle Cash:'}
               </span>
               <span className="font-bold text-[#b40065] bg-[#ffd9e3] px-2 py-0.5 rounded-full text-[11px]">
-                ${clientProfile?.sparkleCash.toFixed(2) || '34.50'}
+                {clientProfile?.sparkleCash ? clientProfile.sparkleCash.toFixed(2) : '15.00'} €
               </span>
             </div>
           </div>
@@ -899,6 +810,14 @@ export default function App() {
                 : "Tap orb to speak"
             }
           />
+
+          {/* Microphone Permission Alert if browser denied access */}
+          {micError && (
+            <div className="bg-[#ffd9e3] border-2 border-[#b40065] text-[#b40065] text-xs font-space px-4 py-2.5 rounded-2xl text-center shadow-md animate-in fade-in flex items-center justify-center gap-2 select-text">
+              <span className="text-base">⚠️</span>
+              <span className="font-semibold">{micError}</span>
+            </div>
+          )}
 
           {/* Conversational Audio Stream / Transcript Exchange */}
           <ConversationStream

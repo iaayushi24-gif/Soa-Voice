@@ -18,10 +18,149 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
 
   const type = actionData.type || '';
 
+  // 0. Official NailsbySoa Pricing Menu Card (Gel-X & Gainage)
+  if (type === 'pricing') {
+    const gelXServices = [
+      { name: language === 'fr' ? 'Vernis simple' : 'Vernis simple', price: '30 €', desc: language === 'fr' ? 'Couleur unie sur extensions' : 'Solid color on full gel extensions' },
+      { name: language === 'fr' ? 'French' : 'French', price: '35 €', desc: language === 'fr' ? 'French manucure classique ou stylée' : 'Classic or custom french tip' },
+      { name: language === 'fr' ? 'French + 2 nail art' : 'French + 2 nail art', price: '37 €', desc: language === 'fr' ? 'French + 2 ongles décorés' : 'French with 2 accent nails' },
+      { name: language === 'fr' ? 'Nail art complet' : 'Nail art complet', price: '40 €', desc: language === 'fr' ? 'Tous les ongles sont travaillés' : 'All nails fully sculpted & designed' },
+      { name: language === 'fr' ? 'Mix&Match Set' : 'Mix&Match Set', price: '45-50 €', desc: language === 'fr' ? 'Chaque ongle est différent' : 'Every single nail is unique' },
+    ];
+
+    const gainageServices = [
+      { name: language === 'fr' ? 'Vernis simple' : 'Vernis simple', price: '25 €', desc: language === 'fr' ? 'Renforcement gel sur ongles naturels' : 'Builder gel on natural nails' },
+      { name: language === 'fr' ? 'French' : 'French', price: '30 €', desc: language === 'fr' ? 'French manucure sur ongles naturels' : 'French on natural nails' },
+      { name: language === 'fr' ? 'French + 2 nail art' : 'French + 2 nail art', price: '30 €', desc: language === 'fr' ? 'French + 2 ongles décorés' : 'French with 2 accent nails' },
+      { name: language === 'fr' ? 'Nail art complet' : 'Nail art complet', price: '35 €', desc: language === 'fr' ? 'Tous les ongles sont travaillés' : 'All natural nails fully worked' },
+      { name: language === 'fr' ? 'Mix&Match Set' : 'Mix&Match Set', price: '40 €', desc: language === 'fr' ? 'Chaque ongle est différent' : 'Every single nail is unique' },
+    ];
+
+    return (
+      <div className="mt-3 bg-gradient-to-br from-white via-[#fff5f9] to-[#ffd9e3]/40 border-2 border-[#b40065]/40 rounded-2xl p-4 shadow-md space-y-3.5">
+        <div className="flex items-center justify-between border-b border-[#ffd9e3] pb-2">
+          <div className="flex items-center space-x-2">
+            <span className="text-[#b40065] text-base animate-pulse">💅</span>
+            <div>
+              <span className="font-syne font-black text-xs uppercase tracking-wider text-[#b40065] block">
+                {language === 'fr' ? 'TARIFS OFFICIELS NAILSBYSOA' : 'OFFICIAL NAILSBYSOA MENU'}
+              </span>
+              <span className="font-space text-[10px] text-[#764d93] font-semibold">
+                {language === 'fr' ? '✦ Tous les prix sont en Euros (€)' : '✦ All official rates in Euros (€)'}
+              </span>
+            </div>
+          </div>
+          <span className="bg-[#b40065] text-white font-space text-[10px] px-2.5 py-1 rounded-full font-bold shadow-xs">
+            100% OFFICIEL
+          </span>
+        </div>
+
+        {/* 1. GEL-X Section */}
+        <div className="bg-white/90 rounded-xl p-3 border border-[#ffd9e3] shadow-xs">
+          <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-[#ffd9e3]">
+            <span className="font-syne font-extrabold text-xs text-[#b40065] tracking-wide flex items-center gap-1.5">
+              <span>✦</span>
+              <span>GEL-X</span>
+              <span className="text-[10px] font-normal text-[#8f6e78]">
+                ({language === 'fr' ? 'Extensions complètes' : 'Full Extensions'})
+              </span>
+            </span>
+            <span className="text-[10px] font-space font-bold text-[#764d93] bg-[#f3daff] px-2 py-0.5 rounded-full">
+              30 € - 50 €
+            </span>
+          </div>
+          <div className="space-y-1.5 font-space">
+            {gelXServices.map((srv, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between py-1 px-2 rounded-lg hover:bg-[#fff0f5] transition-colors cursor-pointer group"
+                onClick={() => onSelectAction(language === 'fr' ? `Je veux réserver un Gel-X ${srv.name} (${srv.price})` : `I want to book a Gel-X ${srv.name} (${srv.price})`)}
+              >
+                <div className="min-w-0 pr-2">
+                  <div className="font-bold text-xs text-[#1f1a1d] group-hover:text-[#b40065] transition-colors flex items-center gap-1">
+                    <span>• {srv.name}</span>
+                  </div>
+                  <div className="text-[10px] text-[#8f6e78] italic truncate">
+                    {srv.desc}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="font-syne font-extrabold text-xs text-[#b40065] bg-[#ffd9e3] px-2 py-0.5 rounded-md">
+                    {srv.price}
+                  </span>
+                  <span className="text-[10px] text-[#764d93] opacity-0 group-hover:opacity-100 transition-opacity">
+                    →
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 2. GAINAGE Section */}
+        <div className="bg-white/90 rounded-xl p-3 border border-[#dcacfb]/50 shadow-xs">
+          <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-[#ffd9e3]">
+            <span className="font-syne font-extrabold text-xs text-[#764d93] tracking-wide flex items-center gap-1.5">
+              <span>✦</span>
+              <span>GAINAGE</span>
+              <span className="text-[10px] font-normal text-[#8f6e78]">
+                ({language === 'fr' ? 'Renforcement sur ongles naturels' : 'Builder Gel on Natural Nails'})
+              </span>
+            </span>
+            <span className="text-[10px] font-space font-bold text-[#b40065] bg-[#ffd9e3] px-2 py-0.5 rounded-full">
+              25 € - 40 €
+            </span>
+          </div>
+          <div className="space-y-1.5 font-space">
+            {gainageServices.map((srv, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between py-1 px-2 rounded-lg hover:bg-[#faf0ff] transition-colors cursor-pointer group"
+                onClick={() => onSelectAction(language === 'fr' ? `Je veux réserver un Gainage ${srv.name} (${srv.price})` : `I want to book a Gainage ${srv.name} (${srv.price})`)}
+              >
+                <div className="min-w-0 pr-2">
+                  <div className="font-bold text-xs text-[#1f1a1d] group-hover:text-[#764d93] transition-colors flex items-center gap-1">
+                    <span>• {srv.name}</span>
+                  </div>
+                  <div className="text-[10px] text-[#8f6e78] italic truncate">
+                    {srv.desc}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="font-syne font-extrabold text-xs text-[#764d93] bg-[#f3daff] px-2 py-0.5 rounded-md">
+                    {srv.price}
+                  </span>
+                  <span className="text-[10px] text-[#b40065] opacity-0 group-hover:opacity-100 transition-opacity">
+                    →
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2 pt-1">
+          <button
+            onClick={() => onSelectAction(language === 'fr' ? 'Quels sont les créneaux disponibles pour Gel-X ?' : 'What slots are available for Gel-X?')}
+            className="flex-1 bg-gradient-to-r from-[#b40065] to-[#e10080] text-white py-2 px-3 rounded-full font-space text-xs font-bold shadow-sm active:scale-95 transition-transform cursor-pointer text-center"
+          >
+            {language === 'fr' ? '✦ Réserver un Gel-X' : '✦ Book Gel-X'}
+          </button>
+          <button
+            onClick={() => onSelectAction(language === 'fr' ? 'Quels sont les créneaux disponibles pour Gainage ?' : 'What slots are available for Gainage?')}
+            className="flex-1 bg-white border border-[#764d93]/40 text-[#764d93] py-2 px-3 rounded-full font-space text-xs font-semibold hover:bg-[#f3daff]/30 active:scale-95 transition-transform cursor-pointer text-center"
+          >
+            {language === 'fr' ? '✦ Réserver un Gainage' : '✦ Book Gainage'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // 1. Past Appointment Details Card
   if (type === 'past_set') {
     const data: PastAppointment = actionData.data;
-    const sparkleCash = actionData.sparkleCash ?? 34.5;
+    const sparkleCash = actionData.sparkleCash ?? 15.0;
 
     return (
       <div className="mt-3 bg-gradient-to-br from-white via-[#fbf1f5] to-[#f3daff]/40 border border-[#e10080]/30 rounded-2xl p-4 shadow-sm space-y-3">
@@ -59,11 +198,11 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
                 </div>
                 <div>
                   <span className="text-[#8f6e78]">{language === 'fr' ? 'Payé :' : 'Paid:'}</span>{' '}
-                  <strong className="text-[#b40065] font-bold">${data.amountPaid.toFixed(2)}</strong>
+                  <strong className="text-[#b40065] font-bold">{data.amountPaid.toFixed(2)} €</strong>
                 </div>
                 <div>
                   <span className="text-[#8f6e78]">{language === 'fr' ? 'Pourboire :' : 'Tip:'}</span>{' '}
-                  <strong className="text-[#1f1a1d]">${data.tip.toFixed(2)}</strong>
+                  <strong className="text-[#1f1a1d]">{data.tip.toFixed(2)} €</strong>
                 </div>
               </div>
             </div>
@@ -88,7 +227,7 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
             {language === 'fr' ? '✨ Solde Sparkle Cash :' : '✨ Sparkle Cash Balance:'}
           </span>
           <span className="font-syne font-extrabold text-[#764d93]">
-            ${sparkleCash.toFixed(2)}
+            {sparkleCash.toFixed(2)} €
           </span>
         </div>
 
@@ -97,13 +236,13 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
             onClick={() => onSelectAction(language === 'fr' ? `Reprendre mon dernier set (${data.set})` : `Re-book my last set (${data.set})`)}
             className="flex-1 bg-gradient-to-r from-[#b40065] to-[#e10080] text-white py-2 px-3 rounded-full font-space text-xs font-bold shadow-sm active:scale-95 transition-transform cursor-pointer text-center"
           >
-            {language === 'fr' ? '✦ Reprendre ce set' : '✦ Re-book This Set'}
+            {language === 'fr' ? '✦ Reprendre ce set (45€)' : '✦ Re-book This Set (45€)'}
           </button>
           <button
-            onClick={() => onSelectAction(language === 'fr' ? 'Réserver un remplissage pour mon dernier set' : 'Book a refill for my last set')}
+            onClick={() => onSelectAction(language === 'fr' ? 'Quels sont les tarifs du Gel-X et du Gainage ?' : 'What are the pricing rates for Gel-X & Gainage?')}
             className="bg-white border border-[#b40065]/40 text-[#b40065] py-2 px-3 rounded-full font-space text-xs font-semibold hover:bg-[#ffd9e3]/30 active:scale-95 transition-transform cursor-pointer"
           >
-            {language === 'fr' ? 'Remplissage ($95)' : 'Refill ($95)'}
+            {language === 'fr' ? 'Tarifs Menu (€)' : 'Menu Rates (€)'}
           </button>
         </div>
       </div>
@@ -113,7 +252,7 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
   // 2. Coupons & Discounts Card
   if (type === 'coupons') {
     const coupons: ClientCoupon[] = actionData.coupons || [];
-    const sparkleCash = actionData.sparkleCash ?? 34.5;
+    const sparkleCash = actionData.sparkleCash ?? 15.0;
 
     return (
       <div className="mt-3 bg-gradient-to-br from-white via-[#fff7f9] to-[#ffd9e3]/30 border border-[#e10080]/30 rounded-2xl p-4 shadow-sm space-y-3">
@@ -125,7 +264,7 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
             </span>
           </div>
           <span className="bg-[#dcacfb] text-[#2e014b] font-space text-[10px] px-2 py-0.5 rounded-full font-bold">
-            ${sparkleCash.toFixed(2)} {language === 'fr' ? 'Disponibles' : 'Available'}
+            {sparkleCash.toFixed(2)} € {language === 'fr' ? 'Disponibles' : 'Available'}
           </span>
         </div>
 
@@ -275,7 +414,7 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
                   </div>
                   <div className="text-right shrink-0">
                     <span className="font-syne font-extrabold text-sm text-[#b40065]">
-                      ${item.price}
+                      {item.price} €
                     </span>
                     <div className="font-space text-[9px] text-[#764d93] font-bold">
                       {item.remainingSlots} {language === 'fr' ? 'RESTANTS' : 'SLOTS'}

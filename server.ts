@@ -41,116 +41,173 @@ const studioData = {
     { id: 'chloe', name: 'Chloe', role: 'Aura & Jelly French Tech', bio: 'Specializes in Japanese blush airbrush, cat-eye, and micro-rhinestones.' },
   ],
   services: [
+    // Gel-X Services (Pose complète extensions)
     {
-      id: 'cyber-chrome-3d',
-      name: 'Signature 3D Cyber Chrome Sculpt',
-      category: 'Full Set',
-      price: 165,
+      id: 'gelx-vernis-simple',
+      name: 'Gel-X Vernis Simple',
+      category: 'Gel-X',
+      price: 30,
+      priceDisplay: '30€',
+      durationMinutes: 60,
+      description: 'Pose Gel-X complète avec application d\'un vernis simple uni au choix.',
+      popularShapes: ['Amande', 'Carré', 'Stiletto'],
+    },
+    {
+      id: 'gelx-french',
+      name: 'Gel-X French',
+      category: 'Gel-X',
+      price: 35,
+      priceDisplay: '35€',
+      durationMinutes: 75,
+      description: 'Pose Gel-X avec French manucure classique ou colorée Y2K.',
+      popularShapes: ['Amande', 'Coffin', 'Carré'],
+    },
+    {
+      id: 'gelx-french-2nailart',
+      name: 'Gel-X French + 2 Nail Art',
+      category: 'Gel-X',
+      price: 37,
+      priceDisplay: '37€',
+      durationMinutes: 75,
+      description: 'Pose Gel-X French accompagnée de 2 ongles travaillés en nail art accent.',
+      popularShapes: ['Stiletto', 'Coffin', 'Amande'],
+    },
+    {
+      id: 'gelx-nail-art-complet',
+      name: 'Gel-X Nail Art Complet',
+      category: 'Gel-X',
+      price: 40,
+      priceDisplay: '40€',
       durationMinutes: 90,
-      description: 'Hand-sculpted gel with liquid chrome dripping accents, mirror-finish topcoat, and 3D metallic stars.',
+      description: 'Pose Gel-X où tous les ongles sont travaillés en nail art artistique.',
       popularShapes: ['Stiletto', 'Long Coffin'],
     },
     {
-      id: 'barbiecore-jelly',
-      name: 'Y2K Barbiecore Jelly Aura Set',
-      category: 'Full Set',
-      price: 140,
-      durationMinutes: 75,
-      description: 'Hot pink translucent jelly base with glowing airbrush aura center and Swarovski crystal sparkles.',
-      popularShapes: ['Almond', 'Medium Coffin'],
-    },
-    {
-      id: 'bratz-metallic',
-      name: 'Bratz 2000s Metallic French Tip',
-      category: 'Full Set',
-      price: 145,
-      durationMinutes: 75,
-      description: 'Deep curved retro French smile lines with mirrored chrome foils and cyber butterfly charms.',
-      popularShapes: ['Duck Nails', 'Square', 'Stiletto'],
-    },
-    {
-      id: 'liquid-mercury',
-      name: 'Liquid Mercury Tears & Pierced Charms',
-      category: 'Art Tier III',
-      price: 175,
+      id: 'gelx-mix-match',
+      name: 'Gel-X Mix&Match Set',
+      category: 'Gel-X',
+      price: 45,
+      priceDisplay: '45-50€',
       durationMinutes: 90,
-      description: 'Molten metal 3D droplets, dangling nail piercing charms, and high-shine silver chrome.',
-      popularShapes: ['Long Stiletto', 'Tapered Square'],
+      description: 'Pose Gel-X Mix&Match signature : chaque ongle est différent et unique (45€ - 50€).',
+      popularShapes: ['Stiletto', 'Coffin', 'Duck Nails'],
+    },
+    // Gainage Services (Renforcement ongles naturels)
+    {
+      id: 'gainage-vernis-simple',
+      name: 'Gainage Vernis Simple',
+      category: 'Gainage',
+      price: 25,
+      priceDisplay: '25€',
+      durationMinutes: 45,
+      description: 'Renforcement au gel sur ongles naturels avec vernis simple uni.',
+      popularShapes: ['Naturel', 'Court', 'Carré arrondi'],
     },
     {
-      id: 'refill-cyber',
-      name: 'Gel Sculpt Refill & Re-Gloss',
-      category: 'Maintenance',
-      price: 95,
+      id: 'gainage-french',
+      name: 'Gainage French',
+      category: 'Gainage',
+      price: 30,
+      priceDisplay: '30€',
       durationMinutes: 60,
-      description: 'Infill growth, rebalance apex, shape refresh, and fresh ultra-gloss chrome or gel topcoat.',
-      popularShapes: ['All'],
+      description: 'Gainage protecteur avec French manucure soignée.',
+      popularShapes: ['Naturel', 'Amande courte', 'Carré'],
+    },
+    {
+      id: 'gainage-french-2nailart',
+      name: 'Gainage French + 2 Nail Art',
+      category: 'Gainage',
+      price: 30,
+      priceDisplay: '30€',
+      durationMinutes: 60,
+      description: 'Gainage French avec 2 ongles décorés en nail art accent.',
+      popularShapes: ['Amande', 'Carré'],
+    },
+    {
+      id: 'gainage-nail-art-complet',
+      name: 'Gainage Nail Art Complet',
+      category: 'Gainage',
+      price: 35,
+      priceDisplay: '35€',
+      durationMinutes: 75,
+      description: 'Gainage avec tous les ongles travaillés en nail art sur mesure.',
+      popularShapes: ['Amande', 'Carré', 'Ovale'],
+    },
+    {
+      id: 'gainage-mix-match',
+      name: 'Gainage Mix&Match Set',
+      category: 'Gainage',
+      price: 40,
+      priceDisplay: '40€',
+      durationMinutes: 75,
+      description: 'Gainage Mix&Match où chaque ongle est différent et personnalisé.',
+      popularShapes: ['Toutes'],
     },
   ],
   client: {
     id: 'client-001',
     name: 'Mia Vance',
-    phone: '(310) 902-8821',
+    phone: '+33 6 12 34 56 78',
     tier: 'VIP Diamond Starlet',
-    sparkleCash: 34.50,
+    sparkleCash: 15.00,
     coupons: [
       {
         code: 'BARBIE20',
-        title: '20% Off Any Full Set',
+        title: '20% de réduction sur tout set',
         discountType: 'percentage',
         discountValue: 20,
-        expires: 'In 5 days',
-        description: 'Valid on any 3D Cyber Chrome, Jelly Aura, or Limited Edition drop.',
+        expires: 'Dans 5 jours',
+        description: 'Valable sur tous les sets Gel-X et Gainage (French, Nail Art Complet, Mix&Match).',
       },
       {
         code: 'SPARKLE15',
-        title: '$15 Off Refill or Nail Art',
+        title: '15€ offerts sur prestation',
         discountType: 'fixed',
         discountValue: 15,
-        expires: 'End of Month',
-        description: 'Apply at checkout toward any refill or 3D charm upgrade.',
+        expires: 'Fin du mois',
+        description: 'Applicable dès 35€ d\'achat sur Nail Art Complet et Mix&Match.',
       },
       {
         code: 'CHROMEGIFT',
-        title: 'Free 3D Chrome Heart Charm',
+        title: 'Breloque ou chrome 3D offert',
         discountType: 'addon',
         discountValue: 0,
-        expires: 'Active VIP Perk',
-        description: 'Complimentary molten chrome heart or star piercing on any service.',
+        expires: 'Avantage VIP actif',
+        description: '1 charme cœur chrome ou étoile 3D offert sur ta pose.',
       },
     ],
     lastAppointment: {
       id: 'apt-prev-001',
-      date: 'Last Friday, Oct 31, 2026',
-      time: '3:00 PM',
+      date: 'Vendredi dernier, 31 Octobre',
+      time: '15h00',
       technician: 'Naomi',
-      set: '3D Cyber Chrome Stiletto set with dripping silver metal & hot pink accents',
-      shape: 'Long Stiletto',
-      colors: ['Hyper Metallic Silver Chrome', 'Electric Magenta Pink Accent'],
-      addOns: ['2x Molten Liquid Drip Accents', 'Swarovski Star Decals'],
-      amountPaid: 165.00,
-      tip: 35.00,
-      total: 200.00,
-      pointsEarned: 165,
+      set: 'Gel-X Mix&Match Set (Chaque ongle différent avec chrome 3D & accents rose)',
+      shape: 'Stiletto Long',
+      colors: ['Silver Chrome Métallique', 'Magenta Cyber Accent'],
+      addOns: ['Gouttes de métal liquide 3D', 'Étoiles Swarovski'],
+      amountPaid: 45.00,
+      tip: 10.00,
+      total: 55.00,
+      pointsEarned: 45,
     },
     history: [
       {
-        date: 'Oct 31, 2026',
-        set: '3D Cyber Chrome Stiletto Set',
+        date: '31 Octobre',
+        set: 'Gel-X Mix&Match Set',
         artist: 'Naomi',
-        paid: '$165.00',
+        paid: '45.00 €',
       },
       {
         date: 'Oct 09, 2026',
-        set: 'Pink Barbie Aura with Strawberry Jelly',
+        set: 'Gainage Mix&Match Set',
         artist: 'Soa',
-        paid: '$145.00',
+        paid: '40.00 €',
       },
       {
         date: 'Sept 15, 2026',
-        set: 'Y2K French Tip with Cyber Butterfly Charms',
+        set: 'Gel-X French manucure',
         artist: 'Chloe',
-        paid: '$130.00',
+        paid: '35.00 €',
       },
     ],
   },
@@ -336,18 +393,59 @@ app.get('/api/bookings', (req, res) => {
 // Helper for deterministic high-glam fallback when Gemini is unavailable or errors
 function generateFallbackResponse(userPrompt: string, language: string = 'en') {
   const q = userPrompt.toLowerCase();
-  const isFr = language === 'fr' || q.includes('bonjour') || q.includes('français') || q.includes('combien') || q.includes('dernier') || q.includes('rendez-vous');
+  const isFr = language === 'fr' || q.includes('bonjour') || q.includes('français') || q.includes('combien') || q.includes('dernier') || q.includes('rendez-vous') || q.includes('tarif');
 
-  // Previous appointment / sets / how much she paid
-  if (q.includes('last') || q.includes('previous') || q.includes('paid') || q.includes('cost') || q.includes('balance') || q.includes('past set') || q.includes('dernier') || q.includes('payé') || q.includes('solde')) {
+  // 1. Official Pricing / Tarifs (Gel-X & Gainage)
+  if (q.includes('price') || q.includes('pricing') || q.includes('tarif') || q.includes('tarifs') || q.includes('coûte') || q.includes('coute') || q.includes('how much') || q.includes('gainage') || q.includes('gel-x') || q.includes('gel x') || q.includes('mix&match') || q.includes('mix and match') || q.includes('vernis simple')) {
+    if (q.includes('gainage')) {
+      return {
+        spokenText: isFr
+          ? `Babe, le Gainage commence à 25€ pour le vernis simple et va jusqu'à 40€ pour le Mix&Match !`
+          : `Babe, Gainage starts at 25€ for solid polish up to 40€ for the Mix&Match set!`,
+        displayText: isFr
+          ? `💅 **Tarifs Gainage NailsbySoa (en euros €) :**\n• **Vernis simple :** 25 €\n• **French :** 30 €\n• **French + 2 nail art :** 30 €\n• **Nail art complet :** 35 € *(Tous les ongles sont travaillés)*\n• **Mix&Match Set :** 40 € *(Chaque ongle est différent)*\n\nTu veux réserver un créneau Gainage, babe ?`
+          : `💅 **Gainage Pricing at NailsbySoa (in Euros €):**\n• **Vernis simple (Solid Polish):** 25 €\n• **French:** 30 €\n• **French + 2 nail art:** 30 €\n• **Nail art complet (Full Art):** 35 € *(All nails styled)*\n• **Mix&Match Set:** 40 € *(Each nail is different)*\n\nShall I book a Gainage session for you, babe?`,
+        intent: 'pricing',
+        actionData: {
+          type: 'pricing',
+          category: 'Gainage',
+          services: studioData.services.filter((s) => s.category === 'Gainage'),
+        },
+        suggestedQuickPrompts: isFr
+          ? ['Réserver Gainage (25€)', 'Tarifs Gel-X', 'Gainage Mix&Match (40€)', 'Mes coupons VIP']
+          : ['Book Gainage (25€)', 'Show Gel-X pricing', 'Mix&Match Gainage (40€)', 'My VIP coupons'],
+      };
+    }
+
+    return {
+      spokenText: isFr
+        ? `Babe, le Gel-X est entre 30€ et 50€, et le Gainage entre 25€ et 40€ selon le nail art !`
+        : `Babe, Gel-X is 30€ to 50€, and Gainage is 25€ to 40€ depending on your nail art!`,
+      displayText: isFr
+        ? `💅 **Tarifs Officiels NailsbySoa (en euros €) :**\n\n✨ **GEL-X (Extensions) :**\n• **Vernis simple :** 30 €\n• **French :** 35 €\n• **French + 2 nail art :** 37 €\n• **Nail art complet :** 40 € *(Tous les ongles travaillés)*\n• **Mix&Match Set :** 45 - 50 € *(Chaque ongle différent)*\n\n🌸 **GAINAGE (Renforcement naturel) :**\n• **Vernis simple :** 25 €\n• **French :** 30 €\n• **French + 2 nail art :** 30 €\n• **Nail art complet :** 35 €\n• **Mix&Match Set :** 40 €\n\nQuel set te fait craquer aujourd'hui, babe ?`
+        : `💅 **Official NailsbySoa Pricing Menu (in Euros €):**\n\n✨ **GEL-X (Full Extensions):**\n• **Vernis simple (Solid Polish):** 30 €\n• **French:** 35 €\n• **French + 2 nail art:** 37 €\n• **Nail art complet (Full Art):** 40 € *(All nails styled)*\n• **Mix&Match Set:** 45 - 50 € *(Each nail is different)*\n\n🌸 **GAINAGE (Natural Nail Builder Gel):**\n• **Vernis simple:** 25 €\n• **French:** 30 €\n• **French + 2 nail art:** 30 €\n• **Nail art complet:** 35 €\n• **Mix&Match Set:** 40 €\n\nWhich set are we doing for you, babe?`,
+      intent: 'pricing',
+      actionData: {
+        type: 'pricing',
+        category: 'All',
+        services: studioData.services,
+      },
+      suggestedQuickPrompts: isFr
+        ? ['Réserver Gel-X French (35€)', 'Mix&Match Gel-X (45€)', 'Tarifs Gainage', 'Voir les créneaux']
+        : ['Book Gel-X French (35€)', 'Gel-X Mix&Match (45€)', 'Gainage pricing', 'Check available slots'],
+    };
+  }
+
+  // 2. Previous appointment / sets / how much she paid
+  if (q.includes('last') || q.includes('previous') || q.includes('paid') || q.includes('past set') || q.includes('dernier') || q.includes('payé') || q.includes('solde')) {
     const prev = studioData.client.lastAppointment;
     return {
       spokenText: isFr
-        ? `Hey babe ! Ton dernier set était le 3D Cyber Chrome avec Naomi pour 165 euros. Tu as 34 euros de Sparkle Cash !`
-        : `Hey babe! Your last set was 3D Cyber Chrome with Naomi for 165 dollars. You got 34 dollars in Sparkle Cash!`,
+        ? `Hey babe ! Ton dernier set était le Gel-X Mix&Match avec Naomi pour 45 euros. Tu as 15 euros de Sparkle Cash !`
+        : `Hey babe! Your last set was the Gel-X Mix&Match with Naomi for 45 euros. You got 15 euros in Sparkle Cash!`,
       displayText: isFr
-        ? `Coucou babe ! Vendredi dernier avec **${prev.technician}**, tu as fait le **${prev.set}** (${prev.shape}) pour **${prev.amountPaid.toFixed(2)} €**. Tu as actuellement **${studioData.client.sparkleCash.toFixed(2)} € de Sparkle Cash** et le code promo **BARBIE20** (20% de réduction) ! Veux-tu réserver ton remplissage ou explorer les tendances jelly aura, babe ?`
-        : `Hey babe! Last Friday with **${prev.technician}**, you got the **${prev.set}** (${prev.shape}) for **$${prev.amountPaid.toFixed(2)}**. You currently have **$${studioData.client.sparkleCash.toFixed(2)} Sparkle Cash** & code **BARBIE20** (20% off) ready! Want me to book your refill or explore trending jelly aura designs, babe?`,
+        ? `Coucou babe ! Vendredi dernier avec **${prev.technician}**, tu as fait le **${prev.set}** (${prev.shape}) pour **${prev.amountPaid.toFixed(2)} €**. Tu as actuellement **${studioData.client.sparkleCash.toFixed(2)} € de Sparkle Cash** et le code promo **BARBIE20** (20% de réduction) ! Veux-tu reprendre ce set ou explorer les tarifs, babe ?`
+        : `Hey babe! Last Friday with **${prev.technician}**, you got the **${prev.set}** (${prev.shape}) for **${prev.amountPaid.toFixed(2)} €**. You currently have **${studioData.client.sparkleCash.toFixed(2)} € in Sparkle Cash** & code **BARBIE20** (20% off) ready! Want me to re-book this set or check our prices, babe?`,
       intent: 'past_appointments',
       actionData: {
         type: 'past_set',
@@ -356,20 +454,20 @@ function generateFallbackResponse(userPrompt: string, language: string = 'en') {
         coupons: studioData.client.coupons,
       },
       suggestedQuickPrompts: isFr
-        ? ['Reprendre mon dernier set', 'Mes coupons VIP', 'Drops édition limitée', 'Idées cyber chrome']
-        : ['Re-book my last set', 'What coupons do I have?', 'Show limited edition drops', 'Trending cyber chrome ideas'],
+        ? ['Reprendre mon dernier set', 'Mes coupons VIP', 'Tarifs Gel-X & Gainage', 'Drops édition limitée']
+        : ['Re-book my last set', 'What coupons do I have?', 'Pricing for Gel-X & Gainage', 'Limited edition drops'],
     };
   }
 
-  // Coupons / discounts
-  if (q.includes('coupon') || q.includes('discount') || q.includes('promo') || q.includes('sparkle cash') || q.includes('deal') || q.includes('réduction') || q.includes('solde')) {
+  // 3. Coupons / discounts
+  if (q.includes('coupon') || q.includes('discount') || q.includes('promo') || q.includes('sparkle cash') || q.includes('deal') || q.includes('réduction')) {
     return {
       spokenText: isFr
-        ? `Je gère babe ! Le code BARBIE20 te donne 20% de réduction, plus 34 euros de Sparkle Cash !`
-        : `I got you babe! Code BARBIE20 gives you 20% off, plus 34 dollars in Sparkle Cash!`,
+        ? `Je gère babe ! Le code BARBIE20 te donne 20% de réduction, plus 15 euros de Sparkle Cash !`
+        : `I got you babe! Code BARBIE20 gives you 20% off, plus 15 euros in Sparkle Cash!`,
       displayText: isFr
-        ? `Voici tes promos VIP, babe ! 💕\n• **BARBIE20** : 20% de réduction sur tout set complet\n• **SPARKLE15** : 15 € offerts sur tout remplissage ou nail art\n• **Solde Sparkle Cash** : **${studioData.client.sparkleCash.toFixed(2)} €** disponibles !\nOn applique BARBIE20 pour ta réservation, babe ?`
-        : `Here are your VIP perks, babe! 💕\n• **BARBIE20**: 20% off any Cyber Chrome or Limited Set\n• **SPARKLE15**: $15 off any refill or nail art tier\n• **Sparkle Cash Balance**: **$${studioData.client.sparkleCash.toFixed(2)}** redeemable anytime!\nShall we apply BARBIE20 to your next booking, babe?`,
+        ? `Voici tes promos VIP, babe ! 💕\n• **BARBIE20** : 20% de réduction sur tout set Gel-X ou Gainage\n• **SPARKLE15** : 15 € offerts dès 35 € de prestation\n• **Solde Sparkle Cash** : **${studioData.client.sparkleCash.toFixed(2)} €** disponibles !\nOn applique BARBIE20 pour ta réservation, babe ?`
+        : `Here are your VIP perks, babe! 💕\n• **BARBIE20**: 20% off any Gel-X or Gainage Set\n• **SPARKLE15**: 15 € off any set from 35 €\n• **Sparkle Cash Balance**: **${studioData.client.sparkleCash.toFixed(2)} €** redeemable anytime!\nShall we apply BARBIE20 to your next booking, babe?`,
       intent: 'coupons_discounts',
       actionData: {
         type: 'coupons',
@@ -377,8 +475,8 @@ function generateFallbackResponse(userPrompt: string, language: string = 'en') {
         sparkleCash: studioData.client.sparkleCash,
       },
       suggestedQuickPrompts: isFr
-        ? ['Appliquer BARBIE20', 'Créneaux de demain', 'Drops exclusifs', 'Inspirations nail art']
-        : ['Apply BARBIE20 and book', 'Check tomorrow\'s availability', 'Limited edition drops', 'Inspire me with nail art'],
+        ? ['Appliquer BARBIE20', 'Créneaux de demain', 'Tarifs Gel-X & Gainage', 'Inspirations nail art']
+        : ['Apply BARBIE20 and book', 'Check tomorrow\'s availability', 'Pricing for Gel-X & Gainage', 'Inspire me with nail art'],
     };
   }
 
@@ -492,39 +590,55 @@ Your persona & signature speaking style:
 - In French: maintain the exact same fun, cool, affectionate vibe, calling her "babe" naturally (e.g. "Coucou babe !", "Je gère babe !", "Trop canon babe !").
 - Extremely knowledgeable about nail sculpting, stiletto/coffin/duck shapes, mirror chrome, jelly aura, cat-eye, molten metal, and Bratz 2000s aesthetics.
 
-Studio Knowledge:
-- Studio: NailsbySoa, 8840 Wilshire Blvd, Beverly Hills. Artists: Soa (Founder), Naomi (Cyber 3D & Chrome), Chloe (Jelly & Aura).
+Studio Knowledge & Official Tarifs:
+- Studio: NailsbySoa, Atelier Y2K Cyber Glam. Artists: Soa (Founder), Naomi (Cyber 3D & Chrome), Chloe (Jelly & Aura).
 - Active Client: Mia Vance (VIP Diamond Starlet).
-- Client Previous Appointment: Last Friday, Oct 31, 2026 with Naomi. Set: "3D Cyber Chrome Stiletto set with dripping silver metal & hot pink accents" ($165.00 paid + $35 tip).
-- Client Loyalty: $34.50 in Sparkle Cash balance. Active coupon code: "BARBIE20" (20% off any full set) and "SPARKLE15" ($15 off refills).
-- Current Limited Edition Drops: "Bratz Cyber Angel Hologram Drop" ($185, 4 slots left), "Barbiecore 2000s Dreamhouse" ($165), "Poison Jelly Neon Aura" ($155).
+- Client Previous Appointment: Vendredi dernier (Oct 31) with Naomi. Set: "Gel-X Mix&Match Set" (45.00 € paid + 10.00 € tip = 55.00 € total).
+- Client Loyalty: 15.00 € in Sparkle Cash balance. Active coupon code: "BARBIE20" (20% off any set) and "SPARKLE15" (15 € off).
 - Availability: Today (3:30 PM with Naomi, 5:45 PM with Soa), Tomorrow (11:00 AM Chloe, 1:30 PM Naomi, 4:00 PM Soa), Friday (12:30 PM Naomi).
 - Nail Art Inspiration: Shapes (Stiletto, Coffin, Duck, Almond), Finishes (3D Molten Metal, Mirror Chrome, Jelly Aura, Velvet Cat-Eye, Pierced Charms), Palettes (Cyber Doll, Strawberry Milk Chrome, Toxic Barbie).
+
+OFFICIAL NAILSBYSOA PRICING MENU (IN EUROS €) - NEVER USE DOLLARS ($):
+========================================================================
+1. GEL-X (Pose complète d'extensions au gel) :
+• Vernis simple (Solid Color / Simple Polish) : 30 €
+• French (French manucure classique ou colorée) : 35 €
+• French + 2 nail art (French + 2 ongles décorés) : 37 €
+• Nail art complet (Tous les ongles travaillés) : 40 €
+• Mix&Match Set (Chaque ongle est différent) : 45 € - 50 €
+
+2. GAINAGE (Renforcement au gel sur ongles naturels) :
+• Vernis simple (Solid Color / Simple Polish) : 25 €
+• French (French manucure) : 30 €
+• French + 2 nail art (French + 2 ongles décorés) : 30 €
+• Nail art complet (Tous les ongles travaillés) : 35 €
+• Mix&Match Set (Chaque ongle est différent) : 40 €
 
 LANGUAGE & VOICE INSTRUCTIONS:
 - The user has selected: ${isFr ? 'FRENCH (Français)' : 'ENGLISH'}.
 - You MUST write the ENTIRE JSON response (spokenText, displayText, and suggestedQuickPrompts) in ${isFr ? 'FRENCH (Français)' : 'ENGLISH'}.
-- "spokenText": MUST be strictly 1 single short, fun, cool sentence (under 18 words) in ${isFr ? 'French' : 'English'}, and YOU MUST naturally call the client "babe" (e.g. "Hey babe, your last set was 3D Cyber Chrome for 165 dollars!", "I got you babe, code BARBIE20 gives you 20% off!"). Never read paragraphs or long explanations!
+- "spokenText": MUST be strictly 1 single short, fun, cool sentence (under 18 words) in ${isFr ? 'French' : 'English'}, and YOU MUST naturally call the client "babe" (e.g. "Babe, le vernis simple est à 30€ en Gel-X et 25€ en Gainage !", "Babe, a French is 35€ for Gel-X or 30€ for Gainage!"). Never read paragraphs!
+- All currency MUST be in EUROS (€).
 
 User query: "${prompt}".
 
 CRITICAL INSTRUCTIONS:
 1. Always respond in valid JSON format matching this schema:
 {
-  "spokenText": "STRICTLY 1 SHORT SENTENCE in ${isFr ? 'French' : 'English'} calling her 'babe' (under 18 words total). Answer directly and stop immediately.",
-  "displayText": "Rich formatted text in ${isFr ? 'French' : 'English'} for the on-screen card, calling her 'babe' and highlighting prices, coupon codes, and set names in bold.",
-  "intent": "One of: 'book_appointment', 'check_availability', 'past_appointments', 'coupons_discounts', 'limited_edition', 'nail_inspiration', 'general_info'",
+  "spokenText": "STRICTLY 1 SHORT SENTENCE in ${isFr ? 'French' : 'English'} calling her 'babe' (under 18 words total) quoting exact prices in Euros (€). Answer directly and stop immediately.",
+  "displayText": "Rich formatted text in ${isFr ? 'French' : 'English'} for the on-screen card, calling her 'babe' and highlighting official prices in € and set names in bold.",
+  "intent": "One of: 'pricing', 'book_appointment', 'check_availability', 'past_appointments', 'coupons_discounts', 'limited_edition', 'nail_inspiration', 'general_info'",
   "actionData": {
-    "type": "past_set" | "coupons" | "limited_editions" | "inspiration" | "availability" | "booking_confirm",
+    "type": "pricing" | "past_set" | "coupons" | "limited_editions" | "inspiration" | "availability" | "booking_confirm",
     "details": {}
   },
   "suggestedQuickPrompts": ["3 to 4 short prompts in ${isFr ? 'French' : 'English'} under 6 words each"]
 }
 
+If the user asks about pricing, costs, or how much sets are (Gel-X, Gainage, French, Mix&Match, Vernis Simple, Nail art complet), give the EXACT official prices in Euros (€) from the menu above.
 If the user wants to book or asks about availability, confirm or list available slots.
-If the user asks what they got last time or what they paid, state the $165 3D Cyber Chrome Stiletto set with Naomi, their $34.50 Sparkle Cash, and BARBIE20 coupon.
+If the user asks what they got last time or what they paid, state the 45.00 € Gel-X Mix&Match Set with Naomi, their 15.00 € Sparkle Cash, and BARBIE20 coupon.
 If the user asks about coupons or discounts, highlight BARBIE20 (20% off) and SPARKLE15.
-If the user asks about limited editions, feature the Bratz Cyber Angel drop and Barbiecore Dreamhouse.
 If the user asks for design inspiration, suggest trending cyber chrome, molten drips, and jelly aura with shapes.
 `;
 
@@ -570,31 +684,50 @@ app.post('/api/voice/process-audio', async (req, res) => {
   }
 
   try {
-    const systemPrompt = `You are "SOA Voice", the fun, cool, affectionate Y2K Barbiecore AI voice assistant for "NailsbySoa" – the high-glam Beverly Hills nail studio.
+    const systemPrompt = `You are "SOA Voice", the fun, cool, affectionate Y2K Barbiecore AI voice assistant for "NailsbySoa" – the high-glam nail studio.
 Listen to the user's spoken audio. First accurately transcribe what they said, then answer directly in your signature style:
 - You are a fun, super cool, stylish bestie who ALWAYS calls the client "babe" naturally and affectionately (e.g., "Hey babe!", "I got you babe!", "You're all booked babe!").
 - In French: maintain the exact same fun, cool, affectionate vibe, calling her "babe" naturally (e.g. "Coucou babe !", "Je gère babe !", "Trop canon babe !").
 - High energy, hyper-feminine, luxurious, cyber-chic Y2K Barbiecore.
 
-Studio Knowledge:
-- Studio: NailsbySoa, 8840 Wilshire Blvd, Beverly Hills. Artists: Soa (Founder), Naomi (Cyber 3D & Chrome), Chloe (Jelly & Aura).
+Studio Knowledge & Official Tarifs:
+- Studio: NailsbySoa, Atelier Y2K Cyber Glam. Artists: Soa (Founder), Naomi (Cyber 3D & Chrome), Chloe (Jelly & Aura).
 - Active Client: Mia Vance (VIP Diamond Starlet).
-- Client Previous Appointment: Last Friday, Oct 31, 2026 with Naomi. Set: "3D Cyber Chrome Stiletto set with dripping silver metal & hot pink accents" ($165.00 paid + $35 tip).
-- Client Loyalty: $34.50 in Sparkle Cash balance. Active coupon code: "BARBIE20" (20% off any full set) and "SPARKLE15" ($15 off refills).
-- Current Limited Edition Drops: "Bratz Cyber Angel Hologram Drop" ($185, 4 slots left), "Barbiecore 2000s Dreamhouse" ($165), "Poison Jelly Neon Aura" ($155).
+- Client Previous Appointment: Vendredi dernier (Oct 31) with Naomi. Set: "Gel-X Mix&Match Set" (45.00 € paid + 10.00 € tip = 55.00 € total).
+- Client Loyalty: 15.00 € in Sparkle Cash balance. Active coupon code: "BARBIE20" (20% off any set) and "SPARKLE15" (15 € off).
 - Availability: Today (3:30 PM with Naomi, 5:45 PM with Soa), Tomorrow (11:00 AM Chloe, 1:30 PM Naomi, 4:00 PM Soa), Friday (12:30 PM Naomi).
 - Nail Art Inspiration: Shapes (Stiletto, Coffin, Duck, Almond), Finishes (3D Molten Metal, Mirror Chrome, Jelly Aura, Velvet Cat-Eye, Pierced Charms), Palettes (Cyber Doll, Strawberry Milk Chrome, Toxic Barbie).
 
+OFFICIAL NAILSBYSOA PRICING MENU (IN EUROS €) - NEVER USE DOLLARS ($):
+========================================================================
+1. GEL-X (Pose complète d'extensions au gel) :
+• Vernis simple (Solid Color / Simple Polish) : 30 €
+• French (French manucure classique ou colorée) : 35 €
+• French + 2 nail art (French + 2 ongles décorés) : 37 €
+• Nail art complet (Tous les ongles travaillés) : 40 €
+• Mix&Match Set (Chaque ongle est différent) : 45 € - 50 €
+
+2. GAINAGE (Renforcement au gel sur ongles naturels) :
+• Vernis simple (Solid Color / Simple Polish) : 25 €
+• French (French manucure) : 30 €
+• French + 2 nail art (French + 2 ongles décorés) : 30 €
+• Nail art complet (Tous les ongles travaillés) : 35 €
+• Mix&Match Set (Chaque ongle est différent) : 40 €
+
 LANGUAGE & VOICE INSTRUCTIONS:
 - The user has selected: ${isFr ? 'FRENCH (Français)' : 'ENGLISH'}.
-- Respond in valid JSON matching this schema:
+- You MUST write the ENTIRE JSON response (spokenText, displayText, and suggestedQuickPrompts) in ${isFr ? 'FRENCH (Français)' : 'ENGLISH'}.
+- "spokenText": MUST be strictly 1 single short, fun, cool sentence (under 18 words) in ${isFr ? 'French' : 'English'}, and YOU MUST naturally call the client "babe" (e.g. "Babe, le vernis simple est à 30€ en Gel-X et 25€ en Gainage !", "Babe, a French is 35€ for Gel-X or 30€ for Gainage!"). Never read paragraphs!
+- All currency MUST be in EUROS (€).
+
+Respond in valid JSON matching this schema:
 {
-  "userTranscription": "Accurate transcription of the user's speech in this audio clip (e.g. 'What coupons do I have?' or 'Quels sont mes créneaux ?')",
-  "spokenText": "STRICTLY 1 SHORT SENTENCE in ${isFr ? 'French' : 'English'} calling her 'babe' (under 18 words total). Answer directly and stop immediately.",
-  "displayText": "Rich formatted text in ${isFr ? 'French' : 'English'} for the on-screen card, calling her 'babe' and highlighting prices, coupon codes, and set names in bold.",
-  "intent": "One of: 'book_appointment', 'check_availability', 'past_appointments', 'coupons_discounts', 'limited_edition', 'nail_inspiration', 'general_info'",
+  "userTranscription": "Accurate transcription of the user's speech in this audio clip (e.g. 'Combien coûte le Gel-X ?' or 'What are the prices?')",
+  "spokenText": "STRICTLY 1 SHORT SENTENCE in ${isFr ? 'French' : 'English'} calling her 'babe' (under 18 words total) quoting exact prices in Euros (€). Answer directly and stop immediately.",
+  "displayText": "Rich formatted text in ${isFr ? 'French' : 'English'} for the on-screen card, calling her 'babe' and highlighting official prices in € and set names in bold.",
+  "intent": "One of: 'pricing', 'book_appointment', 'check_availability', 'past_appointments', 'coupons_discounts', 'limited_edition', 'nail_inspiration', 'general_info'",
   "actionData": {
-    "type": "past_set" | "coupons" | "limited_editions" | "inspiration" | "availability" | "booking_confirm",
+    "type": "pricing" | "past_set" | "coupons" | "limited_editions" | "inspiration" | "availability" | "booking_confirm",
     "details": {}
   },
   "suggestedQuickPrompts": ["3 to 4 short prompts in ${isFr ? 'French' : 'English'} under 6 words each"]
