@@ -6,6 +6,7 @@ interface ActionCardsProps {
   onSelectAction: (voicePrompt: string) => void;
   onBookSlot?: (slot: AvailableSlot, couponCode?: string) => void;
   language?: 'en' | 'fr';
+  onOpenWeb3Hub?: () => void;
 }
 
 export const ActionCards: React.FC<ActionCardsProps> = ({
@@ -13,6 +14,7 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
   onSelectAction,
   onBookSlot,
   language = 'en',
+  onOpenWeb3Hub,
 }) => {
   if (!actionData) return null;
 
@@ -189,12 +191,12 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
               </h4>
               <div className="grid grid-cols-2 gap-1.5 mt-1.5 font-space text-[11px] text-[#5b3f48]">
                 <div>
-                  <span className="text-[#8f6e78]">{language === 'fr' ? 'Artiste :' : 'Tech:'}</span>{' '}
-                  <strong className="text-[#1f1a1d]">{data.technician}</strong>
-                </div>
-                <div>
                   <span className="text-[#8f6e78]">{language === 'fr' ? 'Forme :' : 'Shape:'}</span>{' '}
                   <strong className="text-[#1f1a1d]">{data.shape}</strong>
+                </div>
+                <div>
+                  <span className="text-[#8f6e78]">{language === 'fr' ? 'Studio :' : 'Studio:'}</span>{' '}
+                  <strong className="text-[#b40065] font-bold">NailsbySoa</strong>
                 </div>
                 <div>
                   <span className="text-[#8f6e78]">{language === 'fr' ? 'Payé :' : 'Paid:'}</span>{' '}
@@ -337,9 +339,7 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
                   </span>
                 </div>
                 <div className="font-jakarta text-[11px] text-[#5b3f48] flex items-center space-x-2 mt-0.5">
-                  <span>{language === 'fr' ? 'Artiste :' : 'Artist:'} <strong>{s.artist}</strong></span>
-                  <span>•</span>
-                  <span className="text-[#764d93]">{s.serviceAvailable}</span>
+                  <span className="text-[#764d93] font-medium">{s.serviceAvailable}</span>
                 </div>
               </div>
               <button
@@ -347,7 +347,7 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
                   if (onBookSlot) {
                     onBookSlot(s, 'BARBIE20');
                   } else {
-                    onSelectAction(language === 'fr' ? `Réserver le ${s.date} à ${s.time} avec ${s.artist}` : `Book ${s.date} at ${s.time} with ${s.artist}`);
+                    onSelectAction(language === 'fr' ? `Réserver le ${s.date} à ${s.time}` : `Book ${s.date} at ${s.time}`);
                   }
                 }}
                 className="bg-[#b40065] text-white px-3 py-1.5 rounded-full font-space text-[11px] font-bold hover:bg-[#e10080] active:scale-95 transition-transform cursor-pointer"
@@ -357,6 +357,330 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
             </div>
           ))}
         </div>
+      </div>
+    );
+  }
+
+  // 3.5 Dedicated Campaign Card: THE SOA DROP
+  // 3.5 Dedicated Campaign Card: THE SOA DROP
+  if (type === 'soa_drop') {
+    const drop = actionData.drop || actionData.items?.[0] || {
+      title: 'THE SOA DROP',
+      priceDisplay: '45€ - 50€',
+      remainingSlots: 3,
+      badge: '🔥 OFFICIAL CAMPAIGN',
+      image: '/the_soa_drop.jpg',
+      palette: ['Chrome Miroir Argent', 'Hot Pink Magenta', 'Gouttes Métal 3D', 'Étoiles Strass'],
+      description: 'La création signature ultime par Soa : extensions Gel-X stiletto chrome liquide, pendentifs étoilés percés et finitions haute-couture Y2K.',
+    };
+
+    return (
+      <div className="mt-3 bg-gradient-to-br from-white via-[#fff0f5] to-[#ffd9e3]/50 border-2 border-[#b40065] rounded-3xl p-4 sm:p-5 shadow-lg space-y-4 relative overflow-hidden">
+        {/* Holographic background sheen */}
+        <div className="absolute top-0 right-0 w-44 h-44 bg-gradient-to-bl from-[#ff1493]/20 via-[#dcacfb]/25 to-transparent rounded-full blur-2xl pointer-events-none" />
+
+        {/* Campaign Header */}
+        <div className="flex items-center justify-between border-b border-[#ffd9e3] pb-2.5">
+          <div className="flex items-center space-x-2">
+            <span className="text-[#b40065] text-lg animate-pulse">🔥</span>
+            <div>
+              <span className="font-syne font-black text-xs sm:text-sm uppercase tracking-wider text-[#b40065] block">
+                {language === 'fr' ? 'DÉTAILS DE LA CAMPAGNE // THE SOA DROP' : 'CAMPAIGN DETAILS // THE SOA DROP'}
+              </span>
+              <span className="font-space text-[10px] text-[#764d93] font-semibold">
+                {language === 'fr' ? '✦ Création Haute-Couture & Fidélité Web3 par Soa' : '✦ Signature Couture & Web3 Loyalty by Soa'}
+              </span>
+            </div>
+          </div>
+          <span className="bg-[#b40065] text-white font-space text-[10px] px-2.5 py-1 rounded-full font-bold shadow-xs animate-bounce">
+            {language === 'fr' ? '3 PLACES RESTANTES' : '3 SLOTS LEFT'}
+          </span>
+        </div>
+
+        {/* Hero Visual of THE SOA DROP */}
+        <div className="relative rounded-2xl overflow-hidden border-2 border-[#b40065]/40 shadow-md group">
+          <img
+            src="/the_soa_drop.jpg"
+            alt="THE SOA DROP Campaign Visual"
+            className="w-full h-48 sm:h-56 object-cover object-top transition-transform duration-500 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent flex flex-col justify-end p-3.5">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="bg-[#ffd9e3] text-[#b40065] font-space text-[9px] px-2 py-0.5 rounded-full font-extrabold uppercase tracking-wider">
+                  Y2K BARBIECORE EDITORIAL
+                </span>
+                <h3 className="font-syne font-black text-white text-base sm:text-lg drop-shadow-md mt-0.5">
+                  THE SOA DROP
+                </h3>
+              </div>
+              <div className="text-right">
+                <span className="font-syne font-black text-xl text-[#ff66b2] drop-shadow-md">
+                  {drop.priceDisplay || '45€ - 50€'}
+                </span>
+                <div className="font-space text-[10px] text-white/90">
+                  Gel-X Mix&Match
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Set Specifications & Artistry */}
+        <div className="bg-white/95 rounded-2xl p-3.5 border border-[#ffd9e3] space-y-2.5 shadow-xs">
+          <div className="flex items-center justify-between font-space text-xs">
+            <span className="font-bold text-[#b40065] flex items-center gap-1.5">
+              <span>💅</span>
+              <span>{language === 'fr' ? 'Spécifications du Set Couture' : 'Couture Set Specifications'}</span>
+            </span>
+            <span className="text-[#764d93] font-semibold text-[11px]">
+              {language === 'fr' ? 'Durée : 75-90 min' : 'Duration: 75-90 min'}
+            </span>
+          </div>
+
+          <p className="font-jakarta text-xs text-[#5b3f48] leading-relaxed">
+            {language === 'fr'
+              ? 'Extensions Gel-X stiletto sculptées avec chrome liquide miroir, pendentifs étoilés percés et gouttes de métal 3D. Chaque ongle est travaillé comme une pièce unique haute couture par Soa.'
+              : 'Sculpted Gel-X stiletto extensions featuring molten liquid mirror chrome, pierced star charms, and 3D metal drips. Each nail is handcrafted as an editorial one-of-a-kind art piece by Soa.'}
+          </p>
+
+          <div className="flex flex-wrap gap-1.5 pt-1 border-t border-[#f5ebef]">
+            {['Chrome Miroir Argent', 'Hot Pink Magenta', 'Gouttes Métal 3D', 'Pendentifs Étoilés Percés', 'Finition Wet-Look'].map((trait, i) => (
+              <span
+                key={i}
+                className="bg-[#fff0f5] border border-[#ffd9e3] text-[#764d93] text-[10px] px-2 py-0.5 rounded-full font-space font-semibold"
+              >
+                ✦ {trait}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Campaign Mechanics Summary: Mechanic 1 & Mechanic 2 */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 font-space text-xs">
+          <div className="bg-white p-3 rounded-2xl border border-[#ffd9e3] space-y-1.5 shadow-xs">
+            <div className="flex items-center space-x-1.5 text-[#b40065] font-bold">
+              <span>💳</span>
+              <span>{language === 'fr' ? 'Mécanique 1 : Pass VIP SOA' : 'Mechanic 1: SOA VIP Pass'}</span>
+            </div>
+            <p className="text-[11px] text-[#5b3f48] leading-tight">
+              {language === 'fr'
+                ? 'Carte digitale dans votre wallet. Accès anticipé 48h aux drops, créneaux prioritaires et vote communautaire.'
+                : 'Digital membership card in your wallet. 48h early access to drops, priority booking and voting.'}
+            </p>
+            <div className="text-[10px] text-[#b40065] font-bold bg-[#ffd9e3]/60 px-2 py-0.5 rounded-md">
+              {language === 'fr' ? 'Objectif : Exclusivité & Récompense' : 'Purpose: Exclusivity & Reward'}
+            </div>
+          </div>
+
+          <div className="bg-white p-3 rounded-2xl border border-[#ffd9e3] space-y-1.5 shadow-xs">
+            <div className="flex items-center space-x-1.5 text-[#764d93] font-bold">
+              <span>✨</span>
+              <span>{language === 'fr' ? 'Mécanique 2 : Badges Collectibles' : 'Mechanic 2: Collectibles'}</span>
+            </div>
+            <div className="text-[10px] text-[#5b3f48] space-y-0.5">
+              <div>• {language === 'fr' ? 'Janvier : Collectible 01 (Cyber Star)' : 'January: Collectible 01 (Cyber Star)'}</div>
+              <div>• {language === 'fr' ? 'Février : Collectible 02 (Cyber Butterfly)' : 'February: Collectible 02 (Cyber Butterfly)'}</div>
+              <div>• {language === 'fr' ? 'Mars : Collectible 03 (Poison Jelly)' : 'March: Collectible 03 (Poison Jelly)'}</div>
+            </div>
+            <div className="text-[10px] text-[#764d93] font-bold bg-[#f3daff]/70 px-2 py-0.5 rounded-md">
+              {language === 'fr' ? 'Objectif : Visites répétées (Soulbound)' : 'Purpose: Repeat Visits (Soulbound)'}
+            </div>
+          </div>
+        </div>
+
+        {/* Pricing, Promo & Slots summary */}
+        <div className="bg-gradient-to-r from-[#ffd9e3]/70 via-white to-[#f3daff]/70 p-3 rounded-2xl border border-[#b40065]/30 flex flex-wrap items-center justify-between gap-2 font-space text-xs">
+          <div>
+            <span className="text-[#8f6e78] block text-[10px]">
+              {language === 'fr' ? 'Tarif Officiel Gel-X :' : 'Official Gel-X Rate:'}
+            </span>
+            <span className="font-syne font-black text-sm text-[#b40065]">
+              45 € - 50 € <span className="text-[10px] font-normal text-[#5b3f48]">(-20% avec BARBIE20)</span>
+            </span>
+          </div>
+          <div className="text-right">
+            <span className="text-[#8f6e78] block text-[10px]">
+              {language === 'fr' ? 'Créneaux restants :' : 'Available Slots:'}
+            </span>
+            <span className="font-syne font-bold text-xs text-[#764d93]">
+              {language === 'fr' ? 'Plus que 3 places avec Soa' : 'Only 3 slots with Soa'}
+            </span>
+          </div>
+        </div>
+
+        {/* Booking & Web3 Pass Buttons */}
+        <div className="space-y-2 pt-0.5">
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => onSelectAction(language === 'fr' ? 'Je veux réserver THE SOA DROP à 45€' : 'I want to book THE SOA DROP for 45€')}
+              className="flex-1 bg-gradient-to-r from-[#b40065] via-[#e10080] to-[#764d93] text-white py-2.5 px-3 rounded-full font-space text-xs font-black shadow-md hover:shadow-lg active:scale-95 transition-all cursor-pointer text-center"
+            >
+              {language === 'fr' ? '✦ Réserver THE SOA DROP (45€)' : '✦ Book THE SOA DROP (45€)'}
+            </button>
+            <button
+              onClick={() => onSelectAction(language === 'fr' ? 'Quels sont les créneaux disponibles pour THE SOA DROP ?' : 'What slots are available for THE SOA DROP?')}
+              className="bg-white border border-[#b40065] text-[#b40065] py-2.5 px-3 rounded-full font-space text-xs font-bold hover:bg-[#ffd9e3]/30 active:scale-95 transition-transform cursor-pointer"
+            >
+              {language === 'fr' ? 'Créneaux' : 'Slots'}
+            </button>
+          </div>
+
+          {onOpenWeb3Hub && (
+            <button
+              onClick={onOpenWeb3Hub}
+              className="w-full py-2.5 px-3 rounded-full bg-gradient-to-r from-[#764d93] via-[#b40065] to-[#dcacfb] text-white font-space text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs hover:shadow-md active:scale-95 transition-all cursor-pointer"
+            >
+              <span>💎</span>
+              <span>
+                {language === 'fr'
+                  ? 'Voir les 2 Mécaniques Web3 & Badges'
+                  : 'View the 2 Web3 Mechanics & Badges'}
+              </span>
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // 3.6 Dedicated Web3 Campaign Info Card: The Two Web3 Mechanics
+  if (type === 'web3_campaign') {
+    return (
+      <div className="mt-3 bg-gradient-to-br from-white via-[#fff0f5] to-[#f3daff]/40 border-2 border-[#b40065] rounded-3xl p-4 sm:p-5 shadow-lg space-y-3.5">
+        <div className="flex items-center justify-between border-b border-[#ffd9e3] pb-2.5">
+          <div className="flex items-center space-x-2">
+            <span className="text-xl">💎</span>
+            <div>
+              <h3 className="font-syne font-black text-xs sm:text-sm text-[#b40065] uppercase tracking-wider">
+                {language === 'fr' ? 'LES DEUX MÉCANIQUES WEB3' : 'THE TWO WEB3 MECHANICS'}
+              </h3>
+              <p className="font-space text-[10px] text-[#764d93] font-semibold">
+                {language === 'fr'
+                  ? 'Deux mécanismes complémentaires conçus pour NailsbySoa'
+                  : 'Two complementary mechanisms designed for NailsbySoa'}
+              </p>
+            </div>
+          </div>
+          <span className="bg-[#b40065] text-white font-space text-[9px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
+            WEB3 STRATEGY
+          </span>
+        </div>
+
+        {/* The Two Mechanics Side-by-Side */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-space text-xs">
+          
+          {/* Mechanic 1: SOA VIP Membership Pass */}
+          <div className="bg-white p-3.5 rounded-2xl border-2 border-[#ffd9e3] hover:border-[#b40065] transition-all space-y-2 shadow-xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-extrabold text-[#b40065] bg-[#ffd9e3] px-2 py-0.5 rounded-full uppercase">
+                  {language === 'fr' ? 'Mécanique 1' : 'Mechanic 1'}
+                </span>
+                <span className="text-sm">💳</span>
+              </div>
+              <h4 className="font-syne font-black text-xs sm:text-sm text-[#1f1a1d] mt-1.5">
+                SOA VIP Membership Pass
+              </h4>
+              <p className="text-[10px] text-[#764d93] font-medium italic mt-0.5">
+                {language === 'fr'
+                  ? 'Carte de membre digitale stockée dans votre digital wallet.'
+                  : 'Digital membership card, stored in the customer\'s digital wallet.'}
+              </p>
+
+              <div className="mt-2 space-y-1 font-jakarta text-[11px] text-[#5b3f48]">
+                <div className="flex items-start gap-1.5">
+                  <span className="text-[#b40065] font-bold text-xs">✓</span>
+                  <span>{language === 'fr' ? 'Accès anticipé aux drops mensuels' : 'Early access to monthly nail drops'}</span>
+                </div>
+                <div className="flex items-start gap-1.5">
+                  <span className="text-[#b40065] font-bold text-xs">✓</span>
+                  <span>{language === 'fr' ? 'Réservation prioritaire' : 'Priority booking'}</span>
+                </div>
+                <div className="flex items-start gap-1.5">
+                  <span className="text-[#b40065] font-bold text-xs">✓</span>
+                  <span>{language === 'fr' ? 'Accès à des designs d\'ongles exclusifs' : 'Access to exclusive nail designs'}</span>
+                </div>
+                <div className="flex items-start gap-1.5">
+                  <span className="text-[#b40065] font-bold text-xs">✓</span>
+                  <span>{language === 'fr' ? 'Avantages VIP & récompenses fidélité' : 'VIP benefits and loyalty rewards'}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-[#ffd9e3]/50 rounded-xl p-2 mt-2 border border-[#b40065]/20 font-space text-[10px] text-[#8d004e]">
+              <strong>{language === 'fr' ? 'Objectif :' : 'Purpose:'}</strong>{' '}
+              {language === 'fr'
+                ? 'Récompenser les clientes fidèles et créer un sentiment d\'exclusivité.'
+                : 'Reward loyal customers and create a feeling of exclusivity.'}
+            </div>
+          </div>
+
+          {/* Mechanic 2: SOA Digital Collectibles */}
+          <div className="bg-white p-3.5 rounded-2xl border-2 border-[#ffd9e3] hover:border-[#764d93] transition-all space-y-2 shadow-xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-extrabold text-[#764d93] bg-[#f3daff] px-2 py-0.5 rounded-full uppercase">
+                  {language === 'fr' ? 'Mécanique 2' : 'Mechanic 2'}
+                </span>
+                <span className="text-sm">✨</span>
+              </div>
+              <h4 className="font-syne font-black text-xs sm:text-sm text-[#1f1a1d] mt-1.5">
+                SOA Digital Collectibles
+              </h4>
+              <p className="text-[10px] text-[#764d93] font-medium italic mt-0.5">
+                {language === 'fr'
+                  ? 'Reçu à chaque rendez-vous THE SOA DROP assisté.'
+                  : 'Received every time a customer attends a THE SOA DROP appointment.'}
+              </p>
+
+              {/* Monthly Drop Badges Examples */}
+              <div className="mt-2 bg-[#fdf5f8] p-2 rounded-xl border border-pink-200/60 font-space text-[10px] space-y-1">
+                <div className="flex justify-between items-center text-[#b40065] font-bold">
+                  <span>{language === 'fr' ? '• Drop de Janvier :' : '• January Drop:'}</span>
+                  <span className="bg-[#ffd9e3] px-1.5 py-0.5 rounded text-[9px]">Collectible 01</span>
+                </div>
+                <div className="flex justify-between items-center text-[#764d93] font-bold">
+                  <span>{language === 'fr' ? '• Drop de Février :' : '• February Drop:'}</span>
+                  <span className="bg-[#f3daff] px-1.5 py-0.5 rounded text-[9px]">Collectible 02</span>
+                </div>
+                <div className="flex justify-between items-center text-[#5b3f48] font-bold">
+                  <span>{language === 'fr' ? '• Drop de Mars :' : '• March Drop:'}</span>
+                  <span className="bg-neutral-200 px-1.5 py-0.5 rounded text-[9px]">Collectible 03</span>
+                </div>
+              </div>
+
+              <p className="font-jakarta text-[11px] text-[#5b3f48] mt-2">
+                {language === 'fr'
+                  ? 'Collectionner plusieurs badges débloque des récompenses additionnelles et des expériences exclusives (non-transférables / soulbound).'
+                  : 'Collecting several badges unlocks additional rewards or exclusive experiences (non-transferable / soulbound).'}
+              </p>
+            </div>
+
+            <div className="bg-[#f3daff]/60 rounded-xl p-2 mt-2 border border-[#764d93]/20 font-space text-[10px] text-[#572e73]">
+              <strong>{language === 'fr' ? 'Objectif :' : 'Purpose:'}</strong>{' '}
+              {language === 'fr'
+                ? 'Encourager les visites répétées et impliquer les clientes dans l\'aventure de la marque.'
+                : 'Encourage repeat visits and make customers feel involved in the brand\'s journey.'}
+            </div>
+          </div>
+
+        </div>
+
+        {/* Action Button to Open Web3 Hub */}
+        {onOpenWeb3Hub && (
+          <button
+            onClick={onOpenWeb3Hub}
+            className="w-full py-3 px-4 rounded-full bg-gradient-to-r from-[#b40065] via-[#e10080] to-[#764d93] text-white font-space text-xs font-bold shadow-md hover:shadow-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
+          >
+            <span>💎</span>
+            <span>
+              {language === 'fr'
+                ? 'Explorer le Web3 Hub (Pass, Collectibles & Vote)'
+                : 'Explore Web3 Hub (Pass, Collectibles & Vote)'}
+            </span>
+          </button>
+        )}
       </div>
     );
   }
@@ -382,11 +706,11 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
         <div className="space-y-2.5">
           {items.map((item, idx) => {
             const dropImages = [
+              '/the_soa_drop.jpg',
               'https://lh3.googleusercontent.com/aida-public/AB6AXuBeMKwLYnZQ4ko4cVpgrfTs1Dk_vfOsFd3M3q8XZCNqYQZl4FAtYXAecxq7HQJWpnpPKPi848tPmEzVxoLWgu1iNzeyQPsjBowXBAZ7qk6Uby5v6HkPL6roqUYKCFbn1PjwHn4-drMrxDWYPg3XupBgV5amzoEzxpdd0E7hDAFL4bqqO6S5SwSUGGJ7BzLfKQv7OhHHbetDr8Y0GOFdHJcDz3Ci-nz8AjSX_6Hr4WBDRnfK2J0xL_fz',
               'https://lh3.googleusercontent.com/aida-public/AB6AXuB2qosbMNCJJKZAt04Ehfm7tu6nkjOQ9FPQilS7MIhGpXSDJJaG0qrgD4m_bmp18ykbLtgQ4bIKdyxjwTHaM9i0YEzMdltJOYIyDYX7F5bjp2596--DUbEaFnAzS_HRqj2C80MsNsS5I7H7PS-x9P49ApoQZIpdnYmzUKb6oIB7BFyZrbAH_S1nIETF_OEuKj0LQtEOaIp0CM2DGG50cAl31qEpXK6ejqlJysVrP0o2_w9kCzktYLNM',
-              'https://lh3.googleusercontent.com/aida-public/AB6AXuAyZd3y_ADFhya5GWxpo6npRpKC6Dk5YFhMOBfQuKV-4vmlrthnxeuPUtHTwfU6SwrNFF72ryHy4Nci6mQqqEdBPmptSyiCPbIidBoq7GmQl-oK6YIOFdabBTUcW-8-BWozagixhyU619QtgQhifPEpTS-r_O577-HYBuK0_EoTKqwiwGUPaAMAEOpP-xIF1LHDINJIlYpHjsCU0lD8h-JDI2qq_dK97k75PInq_0tfjzQCbRp4f3In',
             ];
-            const imgUrl = dropImages[idx % dropImages.length];
+            const imgUrl = item.image || dropImages[idx % dropImages.length];
 
             return (
               <div
@@ -414,7 +738,7 @@ export const ActionCards: React.FC<ActionCardsProps> = ({
                   </div>
                   <div className="text-right shrink-0">
                     <span className="font-syne font-extrabold text-sm text-[#b40065]">
-                      {item.price} €
+                      {item.priceDisplay || `${item.price} €`}
                     </span>
                     <div className="font-space text-[9px] text-[#764d93] font-bold">
                       {item.remainingSlots} {language === 'fr' ? 'RESTANTS' : 'SLOTS'}

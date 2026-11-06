@@ -36,9 +36,7 @@ const studioData = {
   phone: '(310) 555-SOAX',
   hours: 'Tue - Sun: 10:00 AM - 8:00 PM',
   artists: [
-    { id: 'soa', name: 'Soa', role: 'Founder & Master 3D Sculptor', bio: 'Creator of signature Cyber Chrome & Molten Gel techniques.' },
-    { id: 'naomi', name: 'Naomi', role: 'Cyber 3D & Chrome Specialist', bio: 'Expert in stiletto piercing, silver starbursts, and Y2K Bratz styles.' },
-    { id: 'chloe', name: 'Chloe', role: 'Aura & Jelly French Tech', bio: 'Specializes in Japanese blush airbrush, cat-eye, and micro-rhinestones.' },
+    { id: 'soa', name: 'Soa', role: 'Owner & Solo Nail Artist', bio: 'Founder and sole nail artist of NailsbySoa.' },
   ],
   services: [
     // Gel-X Services (Pose complète extensions)
@@ -180,7 +178,7 @@ const studioData = {
       id: 'apt-prev-001',
       date: 'Vendredi dernier, 31 Octobre',
       time: '15h00',
-      technician: 'Naomi',
+      technician: 'Soa',
       set: 'Gel-X Mix&Match Set (Chaque ongle différent avec chrome 3D & accents rose)',
       shape: 'Stiletto Long',
       colors: ['Silver Chrome Métallique', 'Magenta Cyber Accent'],
@@ -194,7 +192,7 @@ const studioData = {
       {
         date: '31 Octobre',
         set: 'Gel-X Mix&Match Set',
-        artist: 'Naomi',
+        artist: 'Soa',
         paid: '45.00 €',
       },
       {
@@ -206,12 +204,24 @@ const studioData = {
       {
         date: 'Sept 15, 2026',
         set: 'Gel-X French manucure',
-        artist: 'Chloe',
+        artist: 'Soa',
         paid: '35.00 €',
       },
     ],
   },
   limitedEditions: [
+    {
+      id: 'the-soa-drop',
+      title: 'THE SOA DROP',
+      price: 50,
+      priceDisplay: '45€ - 50€',
+      remainingSlots: 3,
+      badge: '🔥 OFFICIAL CAMPAIGN',
+      image: '/the_soa_drop.jpg',
+      palette: ['Chrome Miroir Argent', 'Hot Pink Magenta', 'Gouttes Métal 3D', 'Étoiles Strass'],
+      description: 'La création signature ultime par Soa : extensions Gel-X stiletto chrome liquide, pendentifs étoilés percés et finitions haute-couture Y2K.',
+      trendingScore: '100% EXCLUSIVE DROP',
+    },
     {
       id: 'bratz-cyber-angel',
       title: 'Bratz Cyber Angel Hologram Drop',
@@ -267,23 +277,23 @@ const studioData = {
     ],
   },
   availableSlots: [
-    { id: 'slot-1', date: 'Today (Nov 4)', time: '3:30 PM', artist: 'Naomi', serviceAvailable: 'All Sets & Refills' },
-    { id: 'slot-2', date: 'Today (Nov 4)', time: '5:45 PM', artist: 'Soa', serviceAvailable: '3D Cyber Chrome & Limited Drops' },
-    { id: 'slot-3', date: 'Tomorrow (Nov 5)', time: '11:00 AM', artist: 'Chloe', serviceAvailable: 'Jelly Aura & French' },
-    { id: 'slot-4', date: 'Tomorrow (Nov 5)', time: '1:30 PM', artist: 'Naomi', serviceAvailable: 'All Sets' },
-    { id: 'slot-5', date: 'Tomorrow (Nov 5)', time: '4:00 PM', artist: 'Soa', serviceAvailable: 'All Sets & Sculpt' },
-    { id: 'slot-6', date: 'Thursday (Nov 6)', time: '2:00 PM', artist: 'Chloe', serviceAvailable: 'Refill & Nail Art' },
-    { id: 'slot-7', date: 'Friday (Nov 7)', time: '12:30 PM', artist: 'Naomi', serviceAvailable: 'Full Sets & Limited Drops' },
+    { id: 'slot-1', date: 'Today (Nov 4)', time: '3:30 PM', artist: 'Soa', serviceAvailable: 'Gel-X, Gainage & Nail Art' },
+    { id: 'slot-2', date: 'Today (Nov 4)', time: '5:45 PM', artist: 'Soa', serviceAvailable: 'Gel-X, Gainage & Nail Art' },
+    { id: 'slot-3', date: 'Tomorrow (Nov 5)', time: '11:00 AM', artist: 'Soa', serviceAvailable: 'Gel-X & Gainage French' },
+    { id: 'slot-4', date: 'Tomorrow (Nov 5)', time: '1:30 PM', artist: 'Soa', serviceAvailable: 'All Sets & Nail Art' },
+    { id: 'slot-5', date: 'Tomorrow (Nov 5)', time: '4:00 PM', artist: 'Soa', serviceAvailable: 'Gel-X Mix&Match Set' },
+    { id: 'slot-6', date: 'Thursday (Nov 6)', time: '2:00 PM', artist: 'Soa', serviceAvailable: 'Gel-X & Gainage Sets' },
+    { id: 'slot-7', date: 'Friday (Nov 7)', time: '12:30 PM', artist: 'Soa', serviceAvailable: 'Gel-X Mix&Match & Full Art' },
   ],
   bookedAppointments: [
     {
       id: 'apt-099',
       clientName: 'Mia Vance',
-      serviceName: 'Signature 3D Cyber Chrome Sculpt',
-      artist: 'Naomi',
+      serviceName: 'Gel-X Mix&Match Set',
+      artist: 'Soa',
       date: 'Friday, Nov 7',
       time: '12:30 PM',
-      price: 132.00,
+      price: 45.00,
       couponApplied: 'BARBIE20 (20% off)',
       status: 'Confirmed',
     },
@@ -367,7 +377,7 @@ app.post('/api/book', (req, res) => {
     id: `apt-${Date.now().toString().slice(-4)}`,
     clientName: clientName || studioData.client.name,
     serviceName: targetService.name,
-    artist: artist || 'Naomi',
+    artist: artist || 'Soa',
     date: date || 'Tomorrow (Nov 5)',
     time: time || '1:30 PM',
     price: Math.round(price * 100) / 100,
@@ -381,7 +391,7 @@ app.post('/api/book', (req, res) => {
   res.json({
     success: true,
     booking: newBooking,
-    message: `You're all booked, gorgeous! ${newBooking.serviceName} with ${newBooking.artist} on ${newBooking.date} at ${newBooking.time}. Total: $${newBooking.price.toFixed(2)}.`,
+    message: `You're all booked, babe! ${newBooking.serviceName} on ${newBooking.date} at ${newBooking.time}. Total: ${newBooking.price.toFixed(2)} €.`,
   });
 });
 
@@ -441,11 +451,11 @@ function generateFallbackResponse(userPrompt: string, language: string = 'en') {
     const prev = studioData.client.lastAppointment;
     return {
       spokenText: isFr
-        ? `Hey babe ! Ton dernier set était le Gel-X Mix&Match avec Naomi pour 45 euros. Tu as 15 euros de Sparkle Cash !`
-        : `Hey babe! Your last set was the Gel-X Mix&Match with Naomi for 45 euros. You got 15 euros in Sparkle Cash!`,
+        ? `Hey babe ! Ton dernier set était le Gel-X Mix&Match pour 45 euros. Tu as 15 euros de Sparkle Cash !`
+        : `Hey babe! Your last set was the Gel-X Mix&Match for 45 euros. You got 15 euros in Sparkle Cash!`,
       displayText: isFr
-        ? `Coucou babe ! Vendredi dernier avec **${prev.technician}**, tu as fait le **${prev.set}** (${prev.shape}) pour **${prev.amountPaid.toFixed(2)} €**. Tu as actuellement **${studioData.client.sparkleCash.toFixed(2)} € de Sparkle Cash** et le code promo **BARBIE20** (20% de réduction) ! Veux-tu reprendre ce set ou explorer les tarifs, babe ?`
-        : `Hey babe! Last Friday with **${prev.technician}**, you got the **${prev.set}** (${prev.shape}) for **${prev.amountPaid.toFixed(2)} €**. You currently have **${studioData.client.sparkleCash.toFixed(2)} € in Sparkle Cash** & code **BARBIE20** (20% off) ready! Want me to re-book this set or check our prices, babe?`,
+        ? `Coucou babe ! Vendredi dernier, tu as fait le **${prev.set}** (${prev.shape}) pour **${prev.amountPaid.toFixed(2)} €**. Tu as actuellement **${studioData.client.sparkleCash.toFixed(2)} € de Sparkle Cash** et le code promo **BARBIE20** (20% de réduction) ! Veux-tu reprendre ce set ou explorer les tarifs, babe ?`
+        : `Hey babe! Last Friday you got the **${prev.set}** (${prev.shape}) for **${prev.amountPaid.toFixed(2)} €**. You currently have **${studioData.client.sparkleCash.toFixed(2)} € in Sparkle Cash** & code **BARBIE20** (20% off) ready! Want me to re-book this set or check our prices, babe?`,
       intent: 'past_appointments',
       actionData: {
         type: 'past_set',
@@ -480,24 +490,57 @@ function generateFallbackResponse(userPrompt: string, language: string = 'en') {
     };
   }
 
-  // Limited edition drops
-  if (q.includes('limited') || q.includes('edition') || q.includes('drop') || q.includes('exclusive') || q.includes('bratz') || q.includes('limitée')) {
-    const drop = studioData.limitedEditions[0];
+  // Campaign: THE SOA DROP & Limited edition drops
+  if (q.includes('soa drop') || q.includes('the drop') || q.includes('campagne') || q.includes('campaign') || q.includes('limited') || q.includes('edition') || q.includes('drop') || q.includes('exclusive') || q.includes('limitée')) {
+    const soaDrop = studioData.limitedEditions[0];
     return {
       spokenText: isFr
-        ? `Trop canon babe ! Le drop Bratz Cyber Angel est en ligne avec seulement 4 créneaux restants !`
-        : `Hey babe! The Bratz Cyber Angel drop is live with only 4 slots left!`,
+        ? `Babe, THE SOA DROP combine extensions Gel-X chrome liquide et nos 2 mécaniques de fidélité Web3 !`
+        : `Babe, THE SOA DROP features molten liquid chrome Gel-X and our two Web3 loyalty mechanics!`,
       displayText: isFr
-        ? `✨ **Drops Atelier en Édition Limitée pour toi, babe :**\n1. **${drop.title}** (${drop.price} €) - *${drop.badge}* : Chrome mercure liquide, foils holographiques et breloques anges.\n2. **Barbiecore 2000s Dreamhouse** (165 €) : Dégradé jelly rose bonbon & cristaux Swarovski.\n3. **Poison Jelly Neon Aura** (155 €) : Vert acidulé avec aura magenta.\nTu veux que je te réserve un créneau, babe ?`
-        : `✨ **Current Limited Edition Drops for you, babe:**\n1. **${drop.title}** ($${drop.price}) - *${drop.badge}*: Liquid mercury chrome, hand-laid holographic foil, and floating metal angel charms.\n2. **Barbiecore 2000s Dreamhouse** ($165) - Hot pink jelly gradient & Swarovski crystal hearts.\n3. **Poison Jelly Neon Aura** ($155) - Translucent acid lime edge with magenta aura.\nWant me to reserve one of the remaining slots for you, babe?`,
+        ? `🔥 **DÉTAILS COMPLETS DE LA CAMPAGNE // THE SOA DROP**\n\n• **Design Signature :** Extensions Gel-X stiletto chrome liquide miroir, pendentifs étoilés percés et gouttes de métal 3D couture par Soa.\n• **Tarif Mix&Match :** **45 € - 50 €** (éligible -20% avec code **BARBIE20**)\n• **Disponibilité :** **Plus que 3 créneaux exclusifs avec Soa !**\n\n💎 **Les Deux Mécaniques Web3 Intégrées :**\n1. **Pass VIP SOA :** Carte digitale dans votre wallet, accès anticipé 48h aux drops, créneaux prioritaires et droit de vote.\n2. **Badges Collectibles :** *Drop de Janvier : Collectible 01*, *Drop de Février : Collectible 02*, *Drop de Mars : Collectible 03* (badges soulbound récompensant chaque rendez-vous).\n\nVeux-tu bloquer ta place pour THE SOA DROP, babe ? 💕`
+        : `🔥 **FULL CAMPAIGN DETAILS // THE SOA DROP**\n\n• **Signature Design:** Molten mirror chrome Gel-X stiletto extensions, pierced star charms & couture 3D metal drips handcrafted by Soa.\n• **Mix&Match Rate:** **45 € - 50 €** (eligible for 20% off with code **BARBIE20**)\n• **Availability:** **Only 3 exclusive slots left with Soa!**\n\n💎 **The Two Integrated Web3 Mechanics:**\n1. **SOA VIP Pass:** Digital membership card in your wallet, 48h early access to drops, priority booking & voting rights.\n2. **Digital Collectibles:** *January Drop: Collectible 01*, *February Drop: Collectible 02*, *March Drop: Collectible 03* (soulbound badges rewarded for each attended appointment).\n\nWant me to lock in your slot for THE SOA DROP, babe? 💕`,
       intent: 'limited_edition',
       actionData: {
-        type: 'limited_editions',
+        type: 'soa_drop',
+        drop: soaDrop,
         items: studioData.limitedEditions,
       },
       suggestedQuickPrompts: isFr
-        ? ['Réserver Cyber Angel', 'Voir les créneaux', 'Mon dernier paiement', 'Formes tendance']
-        : ['Book the Cyber Angel drop', 'Show all available slots', 'What did I pay last time?', 'Trending nail shapes'],
+        ? ['Réserver THE SOA DROP (45€)', 'Pass Web3 & Badges 💎', 'Tarifs Gel-X & Gainage', 'Créneaux disponibles']
+        : ['Book THE SOA DROP (45€)', 'Web3 Pass & Badges 💎', 'Pricing for Gel-X & Gainage', 'Check available slots'],
+    };
+  }
+
+  // Web3 Loyalty Campaign / Pass / Badges / Soulbound / Community Voting / GDPR
+  if (
+    q.includes('web3') ||
+    q.includes('pass') ||
+    q.includes('wallet') ||
+    q.includes('badge') ||
+    q.includes('collectible') ||
+    q.includes('soulbound') ||
+    q.includes('vote') ||
+    q.includes('voting') ||
+    q.includes('gdpr') ||
+    q.includes('rgpd') ||
+    q.includes('loyalty') ||
+    q.includes('fidélité')
+  ) {
+    return {
+      spokenText: isFr
+        ? `Babe, nos 2 mécaniques Web3 sont le Pass VIP dans ton wallet et les badges collectibles à chaque drop !`
+        : `Babe, our 2 Web3 mechanics are the VIP Pass in your wallet and collectible badges for each drop!`,
+      displayText: isFr
+        ? `💎 **LES DEUX MÉCANIQUES WEB3 // NAILSBYSOA**\n\nNous avons conçu deux mécanismes complémentaires pour créer exclusivité, fidélité et co-création :\n\n💳 **Mécanique 1 : SOA VIP Membership Pass**\n• Carte de membre digitale stockée dans votre digital wallet.\n• **Avantages :** Accès anticipé aux drops mensuels, réservation prioritaire, accès à des designs d'ongles exclusifs, avantages VIP et récompenses de fidélité.\n• **Objectif (Purpose) :** Récompenser les clientes fidèles et créer un sentiment d'exclusivité.\n\n✨ **Mécanique 2 : SOA Digital Collectibles**\n• À chaque fois qu'une cliente assiste à un rdv THE SOA DROP, elle reçoit un badge digital lié à cette collection (ex. *Drop de Janvier : Collectible 01*, *Drop de Février : Collectible 02*, *Drop de Mars : Collectible 03*).\n• Collectionner plusieurs badges débloque des récompenses additionnelles ou des expériences exclusives.\n• Non-transférables (Soulbound) pour éviter la revente spéculative.\n• **Objectif (Purpose) :** Encourager les visites répétées et impliquer les clientes dans l'aventure de la marque.\n\nOn ouvre ton Hub Web3 pour explorer ton Pass et tes Badges, babe ? 💕`
+        : `💎 **THE TWO WEB3 MECHANICS // NAILSBYSOA**\n\nWe designed two complementary mechanisms built around genuine loyalty and exclusivity:\n\n💳 **Mechanic 1: SOA VIP Membership Pass**\n• Digital membership card, stored in the customer's digital wallet.\n• **Gives members:** Early access to monthly nail drops, priority booking, access to exclusive nail designs, VIP benefits and loyalty rewards.\n• **Purpose:** Reward loyal customers and create a feeling of exclusivity.\n\n✨ **Mechanic 2: SOA Digital Collectibles**\n• Every time a customer attends a THE SOA DROP appointment, they receive a digital collectible badge linked to that collection (*January Drop: Collectible 01*, *February Drop: Collectible 02*, *March Drop: Collectible 03*).\n• Collecting several badges can unlock additional rewards or exclusive experiences.\n• Strictly non-transferable (no speculative resale; focused purely on loyalty).\n• **Purpose:** Encourage repeat visits and make customers feel involved in the brand's journey.\n\nShall we open your Web3 Hub to check your pass and badges, babe? 💕`,
+      intent: 'web3_campaign',
+      actionData: {
+        type: 'web3_campaign',
+      },
+      suggestedQuickPrompts: isFr
+        ? ['Ouvrir le Hub Web3 💎', 'Drop de Janvier : Collectible 01', 'Drop de Février : Collectible 02', 'Voter pour le prochain drop']
+        : ['Open Web3 Hub 💎', 'January Drop: Collectible 01', 'February Drop: Collectible 02', 'Vote on next drop design'],
     };
   }
 
@@ -508,8 +551,8 @@ function generateFallbackResponse(userPrompt: string, language: string = 'en') {
         ? `Ooh babe ! Les ongles stiletto avec gouttes chromées 3D font fureur en ce moment !`
         : `Ooh babe! Long stiletto nails with 3D chrome drips are super hot right now!`,
       displayText: isFr
-        ? `💅 **Inspirations Y2K Cyber Glam pour toi, babe :**\n• **Formes tendance :** Stiletto (ultra-pointu & glam) et Coffin effilé.\n• **Finitions :** Gouttes de métal liquide 3D, piercings d'ongles, et effet œil de chat velours.\n• **Palette virale :** **Cyber Doll** (Magenta électrique + Chrome miroir argent + Lilas holographique).\nOn te réserve ce look avec Naomi ou Soa, babe ?`
-        : `💅 **Y2K Cyber Glam Styling Inspiration for you, babe:**\n• **Trending Shapes:** Stiletto (ultra-sleek & sharp) and 2000s Duck or Tapered Coffin.\n• **Hot Finishes:** 3D Molten Metal Chrome Drips, Pierced Charms, and Magnetic Velvet Cat-Eye.\n• **Viral Palette:** **Cyber Doll** (Hot Magenta #FF1493 + Mirror Chrome Silver + Holographic Lilac).\nWant me to set up an appointment for this look with Naomi or Soa, babe?`,
+        ? `💅 **Inspirations Y2K Cyber Glam pour toi, babe :**\n• **Formes tendance :** Stiletto (ultra-pointu & glam) et Coffin effilé.\n• **Finitions :** Gouttes de métal liquide 3D, piercings d'ongles, et effet œil de chat velours.\n• **Palette virale :** **Cyber Doll** (Magenta électrique + Chrome miroir argent + Lilas holographique).\nOn te réserve ce look chez NailsbySoa, babe ?`
+        : `💅 **Y2K Cyber Glam Styling Inspiration for you, babe:**\n• **Trending Shapes:** Stiletto (ultra-sleek & sharp) and 2000s Duck or Tapered Coffin.\n• **Hot Finishes:** 3D Molten Metal Chrome Drips, Pierced Charms, and Magnetic Velvet Cat-Eye.\n• **Viral Palette:** **Cyber Doll** (Hot Magenta #FF1493 + Mirror Chrome Silver + Holographic Lilac).\nWant me to set up an appointment for this look at NailsbySoa, babe?`,
       intent: 'nail_inspiration',
       actionData: {
         type: 'inspiration',
@@ -525,14 +568,13 @@ function generateFallbackResponse(userPrompt: string, language: string = 'en') {
 
   // Book appointment / availability
   if (q.includes('book') || q.includes('appointment') || q.includes('schedule') || q.includes('available') || q.includes('slot') || q.includes('time') || q.includes('today') || q.includes('tomorrow') || q.includes('réserve') || q.includes('créneau') || q.includes('dispo')) {
-    const nextSlot = studioData.availableSlots[0];
     return {
       spokenText: isFr
-        ? `J'ai regardé pour toi babe ! Naomi a un créneau demain à 13h30 ou Soa à 16h00 !`
-        : `I checked for you babe! Naomi has an opening tomorrow at 1:30 PM, or Soa at 4:00 PM!`,
+        ? `J'ai regardé pour toi babe ! Il y a des créneaux disponibles aujourd'hui à 15h30 et demain à 13h30 !`
+        : `I checked for you babe! We have openings today at 3:30 PM and tomorrow at 1:30 PM!`,
       displayText: isFr
-        ? `✨ **Disponibilités actuelles chez NailsbySoa :**\n• **Aujourd'hui :** ${studioData.availableSlots[0].time} avec **${studioData.availableSlots[0].artist}** | ${studioData.availableSlots[1].time} avec **${studioData.availableSlots[1].artist}**\n• **Demain :** 11h00 avec **Chloe** | 13h30 avec **Naomi** | 16h00 avec **Soa**\nDis « Réserve demain à 13h30 avec Naomi » ou clique pour valider, babe !`
-        : `✨ **Current Service Availability at NailsbySoa:**\n• **Today:** ${studioData.availableSlots[0].time} with **${studioData.availableSlots[0].artist}** | ${studioData.availableSlots[1].time} with **${studioData.availableSlots[1].artist}**\n• **Tomorrow:** 11:00 AM with **Chloe** | 1:30 PM with **Naomi** | 4:00 PM with **Soa**\nSay "Book tomorrow at 1:30 PM with Naomi" or tap to confirm, babe!`,
+        ? `✨ **Disponibilités actuelles chez NailsbySoa :**\n• **Aujourd'hui :** 15h30 | 17h45\n• **Demain :** 11h00 | 13h30 | 16h00\nDis « Réserve demain à 13h30 » ou clique pour valider, babe !`
+        : `✨ **Current Service Availability at NailsbySoa:**\n• **Today:** 3:30 PM | 5:45 PM\n• **Tomorrow:** 11:00 AM | 1:30 PM | 4:00 PM\nSay "Book tomorrow at 1:30 PM" or tap to confirm, babe!`,
       intent: 'check_availability',
       actionData: {
         type: 'availability',
@@ -551,8 +593,8 @@ function generateFallbackResponse(userPrompt: string, language: string = 'en') {
       ? `Coucou babe ! Je suis Soa Voice. Demande-moi tes anciens sets, tes promos ou réserve un créneau !`
       : `Hey babe! I'm Soa Voice. Ask me about your past sets, coupons, or book a slot!`,
     displayText: isFr
-      ? `Coucou babe ! Bienvenue sur **SOA Voice** ✦ ton assistante vocale fun et stylée chez **NailsbySoa**.\n\nDemande-moi tout ce que tu veux :\n• *« Quels sets ai-je faits la dernière fois, babe ? »*\n• *« Quels coupons ou réductions ai-je ? »*\n• *« Y a-t-il des drops en édition limitée en ce moment ? »*\n• *« Donne-moi des idées de formes, couleurs et designs ! »*\n• *« Réserve un rendez-vous avec Naomi »*`
-      : `Hey babe! Welcome to **SOA Voice** ✦ your fun, cool Y2K Barbiecore voice bestie at **NailsbySoa**.\n\nAsk me anything like:\n• *"What sets did I get last time, babe?"*\n• *"What coupons or discounts do I have?"*\n• *"Are there any limited edition drops right now?"*\n• *"I need ideas for new nail designs, shapes, and colors!"*\n• *"Check availability and book an appointment with Naomi"*`,
+      ? `Coucou babe ! Bienvenue sur **SOA Voice** ✦ ton assistante vocale fun et stylée chez **NailsbySoa**.\n\nDemande-moi tout ce que tu veux :\n• *« Quels sets ai-je faits la dernière fois, babe ? »*\n• *« Quels coupons ou réductions ai-je ? »*\n• *« Y a-t-il des drops en édition limitée en ce moment ? »*\n• *« Donne-moi des idées de formes, couleurs et designs ! »*\n• *« Réserve un rendez-vous demain à 13h30 »*`
+      : `Hey babe! Welcome to **SOA Voice** ✦ your fun, cool Y2K Barbiecore voice bestie at **NailsbySoa**.\n\nAsk me anything like:\n• *"What sets did I get last time, babe?"*\n• *"What coupons or discounts do I have?"*\n• *"Are there any limited edition drops right now?"*\n• *"I need ideas for new nail designs, shapes, and colors!"*\n• *"Check availability and book an appointment"*`,
     intent: 'general_info',
     actionData: {
       type: 'overview',
@@ -591,11 +633,18 @@ Your persona & signature speaking style:
 - Extremely knowledgeable about nail sculpting, stiletto/coffin/duck shapes, mirror chrome, jelly aura, cat-eye, molten metal, and Bratz 2000s aesthetics.
 
 Studio Knowledge & Official Tarifs:
-- Studio: NailsbySoa, Atelier Y2K Cyber Glam. Artists: Soa (Founder), Naomi (Cyber 3D & Chrome), Chloe (Jelly & Aura).
+- Studio: NailsbySoa, Atelier Y2K Cyber Glam. Founder & Solo Nail Artist: Soa (Soa is the only technician and the owner of the studio; there are NO other nail techs, so NEVER mention Naomi or Chloe).
+- Official Campaign: "THE SOA DROP" – Our flagship Y2K signature campaign created by Soa! Features liquid chrome molten metal, 3D pierced star charms, and hot magenta accents (45 € - 50 € Mix&Match Gel-X, only 3 exclusive slots left). Hype it up whenever the client asks!
+- Web3 Loyalty Campaign Strategy ("THE SOA DROP" Web3 Experience):
+  * Web3 Purpose: We do NOT use Web3 for crypto hype or speculative NFTs. We use it to create genuine exclusivity, community participation, and long-term customer loyalty.
+  * Mechanic 1 — SOA VIP Membership Pass: A digital membership card stored in the customer's digital wallet. Gives 48h early access to monthly nail drops, priority booking, access to exclusive designs, VIP benefits, and community voting.
+  * Mechanic 2 — SOA Digital Collectibles: Non-transferable (soulbound) holographic proof-of-attendance badges awarded after attending each THE SOA DROP appointment (e.g., Drop 01 Cyber Star, Drop 02 Cyber Butterfly, Drop 03 Gothic Chrome). Badges unlock milestone loyalty rewards (like free Swarovski crystals). They are strictly non-resellable and non-transferable to prevent financial speculation and reward real loyalty!
+  * Community Co-Creation: VIP members vote on future nail drop designs and finishes.
+  * 6-Step Customer Experience: 1. Discover on Instagram -> 2. Sign up on app -> 3. Give transparent GDPR consent -> 4. Unlock digital VIP pass -> 5. Enjoy VIP benefits & vote -> 6. Receive collectible badge after appointment.
 - Active Client: Mia Vance (VIP Diamond Starlet).
-- Client Previous Appointment: Vendredi dernier (Oct 31) with Naomi. Set: "Gel-X Mix&Match Set" (45.00 € paid + 10.00 € tip = 55.00 € total).
+- Client Previous Appointment: Vendredi dernier (Oct 31). Set: "Gel-X Mix&Match Set" (45.00 € paid + 10.00 € tip = 55.00 € total).
 - Client Loyalty: 15.00 € in Sparkle Cash balance. Active coupon code: "BARBIE20" (20% off any set) and "SPARKLE15" (15 € off).
-- Availability: Today (3:30 PM with Naomi, 5:45 PM with Soa), Tomorrow (11:00 AM Chloe, 1:30 PM Naomi, 4:00 PM Soa), Friday (12:30 PM Naomi).
+- Availability: Today (3:30 PM, 5:45 PM), Tomorrow (11:00 AM, 1:30 PM, 4:00 PM), Friday (12:30 PM).
 - Nail Art Inspiration: Shapes (Stiletto, Coffin, Duck, Almond), Finishes (3D Molten Metal, Mirror Chrome, Jelly Aura, Velvet Cat-Eye, Pierced Charms), Palettes (Cyber Doll, Strawberry Milk Chrome, Toxic Barbie).
 
 OFFICIAL NAILSBYSOA PRICING MENU (IN EUROS €) - NEVER USE DOLLARS ($):
@@ -627,17 +676,18 @@ CRITICAL INSTRUCTIONS:
 {
   "spokenText": "STRICTLY 1 SHORT SENTENCE in ${isFr ? 'French' : 'English'} calling her 'babe' (under 18 words total) quoting exact prices in Euros (€). Answer directly and stop immediately.",
   "displayText": "Rich formatted text in ${isFr ? 'French' : 'English'} for the on-screen card, calling her 'babe' and highlighting official prices in € and set names in bold.",
-  "intent": "One of: 'pricing', 'book_appointment', 'check_availability', 'past_appointments', 'coupons_discounts', 'limited_edition', 'nail_inspiration', 'general_info'",
+  "intent": "One of: 'pricing', 'book_appointment', 'check_availability', 'past_appointments', 'coupons_discounts', 'limited_edition', 'web3_campaign', 'nail_inspiration', 'general_info'",
   "actionData": {
-    "type": "pricing" | "past_set" | "coupons" | "limited_editions" | "inspiration" | "availability" | "booking_confirm",
+    "type": "pricing" | "past_set" | "coupons" | "limited_editions" | "web3_campaign" | "inspiration" | "availability" | "booking_confirm",
     "details": {}
   },
   "suggestedQuickPrompts": ["3 to 4 short prompts in ${isFr ? 'French' : 'English'} under 6 words each"]
 }
 
 If the user asks about pricing, costs, or how much sets are (Gel-X, Gainage, French, Mix&Match, Vernis Simple, Nail art complet), give the EXACT official prices in Euros (€) from the menu above.
+If the user asks about Web3, passes, digital collectibles, badges, voting, or GDPR, explain the two mechanics (VIP pass in digital wallet + non-transferable soulbound collectible badges after drop appointments) and set intent to 'web3_campaign' and actionData type to 'web3_campaign'.
 If the user wants to book or asks about availability, confirm or list available slots.
-If the user asks what they got last time or what they paid, state the 45.00 € Gel-X Mix&Match Set with Naomi, their 15.00 € Sparkle Cash, and BARBIE20 coupon.
+If the user asks what they got last time or what they paid, state the 45.00 € Gel-X Mix&Match Set, their 15.00 € Sparkle Cash, and BARBIE20 coupon.
 If the user asks about coupons or discounts, highlight BARBIE20 (20% off) and SPARKLE15.
 If the user asks for design inspiration, suggest trending cyber chrome, molten drips, and jelly aura with shapes.
 `;
@@ -691,11 +741,18 @@ Listen to the user's spoken audio. First accurately transcribe what they said, t
 - High energy, hyper-feminine, luxurious, cyber-chic Y2K Barbiecore.
 
 Studio Knowledge & Official Tarifs:
-- Studio: NailsbySoa, Atelier Y2K Cyber Glam. Artists: Soa (Founder), Naomi (Cyber 3D & Chrome), Chloe (Jelly & Aura).
+- Studio: NailsbySoa, Atelier Y2K Cyber Glam. Founder & Solo Nail Artist: Soa (Soa is the only technician and the owner of the studio; there are NO other nail techs, so NEVER mention Naomi or Chloe).
+- Official Campaign: "THE SOA DROP" – Our flagship Y2K signature campaign created by Soa! Features liquid chrome molten metal, 3D pierced star charms, and hot magenta accents (45 € - 50 € Mix&Match Gel-X, only 3 exclusive slots left). Hype it up whenever the client asks!
+- Web3 Loyalty Campaign Strategy ("THE SOA DROP" Web3 Experience):
+  * Web3 Purpose: We do NOT use Web3 for crypto hype or speculative NFTs. We use it to create genuine exclusivity, community participation, and long-term customer loyalty.
+  * Mechanic 1 — SOA VIP Membership Pass: A digital membership card stored in the customer's digital wallet. Gives 48h early access to monthly nail drops, priority booking, access to exclusive designs, VIP benefits, and community voting.
+  * Mechanic 2 — SOA Digital Collectibles: Non-transferable (soulbound) holographic proof-of-attendance badges awarded after attending each THE SOA DROP appointment (e.g., Drop 01 Cyber Star, Drop 02 Cyber Butterfly, Drop 03 Gothic Chrome). Badges unlock milestone loyalty rewards (like free Swarovski crystals). They are strictly non-resellable and non-transferable to prevent financial speculation and reward real loyalty!
+  * Community Co-Creation: VIP members vote on future nail drop designs and finishes.
+  * 6-Step Customer Experience: 1. Discover on Instagram -> 2. Sign up on app -> 3. Give transparent GDPR consent -> 4. Unlock digital VIP pass -> 5. Enjoy VIP benefits & vote -> 6. Receive collectible badge after appointment.
 - Active Client: Mia Vance (VIP Diamond Starlet).
-- Client Previous Appointment: Vendredi dernier (Oct 31) with Naomi. Set: "Gel-X Mix&Match Set" (45.00 € paid + 10.00 € tip = 55.00 € total).
+- Client Previous Appointment: Vendredi dernier (Oct 31). Set: "Gel-X Mix&Match Set" (45.00 € paid + 10.00 € tip = 55.00 € total).
 - Client Loyalty: 15.00 € in Sparkle Cash balance. Active coupon code: "BARBIE20" (20% off any set) and "SPARKLE15" (15 € off).
-- Availability: Today (3:30 PM with Naomi, 5:45 PM with Soa), Tomorrow (11:00 AM Chloe, 1:30 PM Naomi, 4:00 PM Soa), Friday (12:30 PM Naomi).
+- Availability: Today (3:30 PM, 5:45 PM), Tomorrow (11:00 AM, 1:30 PM, 4:00 PM), Friday (12:30 PM).
 - Nail Art Inspiration: Shapes (Stiletto, Coffin, Duck, Almond), Finishes (3D Molten Metal, Mirror Chrome, Jelly Aura, Velvet Cat-Eye, Pierced Charms), Palettes (Cyber Doll, Strawberry Milk Chrome, Toxic Barbie).
 
 OFFICIAL NAILSBYSOA PRICING MENU (IN EUROS €) - NEVER USE DOLLARS ($):
@@ -725,9 +782,9 @@ Respond in valid JSON matching this schema:
   "userTranscription": "Accurate transcription of the user's speech in this audio clip (e.g. 'Combien coûte le Gel-X ?' or 'What are the prices?')",
   "spokenText": "STRICTLY 1 SHORT SENTENCE in ${isFr ? 'French' : 'English'} calling her 'babe' (under 18 words total) quoting exact prices in Euros (€). Answer directly and stop immediately.",
   "displayText": "Rich formatted text in ${isFr ? 'French' : 'English'} for the on-screen card, calling her 'babe' and highlighting official prices in € and set names in bold.",
-  "intent": "One of: 'pricing', 'book_appointment', 'check_availability', 'past_appointments', 'coupons_discounts', 'limited_edition', 'nail_inspiration', 'general_info'",
+  "intent": "One of: 'pricing', 'book_appointment', 'check_availability', 'past_appointments', 'coupons_discounts', 'limited_edition', 'web3_campaign', 'nail_inspiration', 'general_info'",
   "actionData": {
-    "type": "pricing" | "past_set" | "coupons" | "limited_editions" | "inspiration" | "availability" | "booking_confirm",
+    "type": "pricing" | "past_set" | "coupons" | "limited_editions" | "web3_campaign" | "inspiration" | "availability" | "booking_confirm",
     "details": {}
   },
   "suggestedQuickPrompts": ["3 to 4 short prompts in ${isFr ? 'French' : 'English'} under 6 words each"]

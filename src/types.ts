@@ -60,6 +60,8 @@ export interface LimitedEditionItem {
   id: string;
   title: string;
   price: number;
+  priceDisplay?: string;
+  image?: string;
   remainingSlots: number;
   badge: string;
   palette: string[];

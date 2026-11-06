@@ -9,6 +9,7 @@ interface ConversationStreamProps {
   onBookSlot?: (slot: AvailableSlot, couponCode?: string) => void;
   isProcessing?: boolean;
   language?: 'en' | 'fr';
+  onOpenWeb3Hub?: () => void;
 }
 
 export const ConversationStream: React.FC<ConversationStreamProps> = ({
@@ -17,6 +18,7 @@ export const ConversationStream: React.FC<ConversationStreamProps> = ({
   onBookSlot,
   isProcessing,
   language = 'en',
+  onOpenWeb3Hub,
 }) => {
   return (
     <div className="space-y-4 w-full">
@@ -75,6 +77,7 @@ export const ConversationStream: React.FC<ConversationStreamProps> = ({
                   onSelectAction={onSelectAction}
                   onBookSlot={onBookSlot}
                   language={language}
+                  onOpenWeb3Hub={onOpenWeb3Hub}
                 />
               )}
             </div>

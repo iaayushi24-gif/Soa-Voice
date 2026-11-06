@@ -4,12 +4,15 @@ import { VoiceOrb } from './components/VoiceOrb';
 import { ConversationStream } from './components/ConversationStream';
 import { QuickPrompts } from './components/QuickPrompts';
 import { HandsFreeBar } from './components/HandsFreeBar';
+import { Web3LoyaltyHub } from './components/Web3LoyaltyHub';
 import { audioService } from './services/audio';
 import { VoiceMessage, ClientProfile, AvailableSlot } from './types';
 
 export default function App() {
   // Starts on the DVD Screensaver matching nailsbysoa.netlify.app
   const [view, setView] = useState<'screensaver' | 'studio'>('screensaver');
+  const [isWeb3HubOpen, setIsWeb3HubOpen] = useState(false);
+  const [isCampaignModalOpen, setIsCampaignModalOpen] = useState(false);
 
   const [messages, setMessages] = useState<VoiceMessage[]>([
     {
@@ -22,9 +25,9 @@ export default function App() {
       id: 'msg-init-soa',
       sender: 'soa',
       text:
-        'Hey babe! Last Friday you got the **Gel-X Mix&Match Set** with Naomi (45.00 €). You have **15.00 € in Sparkle Cash** & code **BARBIE20** active! Want to see our Gel-X & Gainage prices or book your next set, babe?',
+        'Hey babe! Last Friday you got the **Gel-X Mix&Match Set** (45.00 €). You have **15.00 € in Sparkle Cash** & code **BARBIE20** active! Want to see our Gel-X & Gainage prices or book your next set, babe?',
       spokenText:
-        'Hey babe! Your last set was the Gel-X Mix&Match with Naomi for 45 euros. You have 15 euros in Sparkle Cash!',
+        'Hey babe! Your last set was the Gel-X Mix&Match for 45 euros. You have 15 euros in Sparkle Cash!',
       timestamp: 'Just now',
       durationSeconds: 5,
       intent: 'past_appointments',
@@ -34,7 +37,7 @@ export default function App() {
           id: 'apt-prev-001',
           date: 'Last Friday, Oct 31, 2026',
           time: '3:00 PM',
-          technician: 'Naomi',
+          technician: 'Soa',
           set: 'Gel-X Mix&Match Set (Chaque ongle est différent)',
           shape: 'Long Stiletto',
           colors: ['Hyper Metallic Silver Chrome', 'Electric Magenta Pink Accent'],
@@ -73,21 +76,21 @@ export default function App() {
   }, []);
 
   const EN_PROMPTS = [
+    'THE SOA DROP ✨',
+    'What is the Web3 VIP Pass? 💎',
+    'Show my collectible badges ✨',
     'Pricing for Gel-X & Gainage',
-    'How much for a French set?',
-    'Re-book my last set (45€)',
-    'What coupons do I have?',
+    'Vote on next drop design 🗳️',
     'Check availability today',
-    'Trending cyber chrome',
   ];
 
   const FR_PROMPTS = [
+    'THE SOA DROP ✨',
+    'C\'est quoi le Pass VIP Web3 ? 💎',
+    'Voir mes badges de fidélité ✨',
     'Tarifs Gel-X & Gainage',
-    'Combien pour un French ?',
-    'Reprendre mon dernier set (45€)',
-    'Quels sont mes coupons ?',
+    'Voter pour le prochain drop 🗳️',
     'Créneaux disponibles',
-    'Tendances cyber chrome',
   ];
 
   const [suggestedPrompts, setSuggestedPrompts] = useState<string[]>(EN_PROMPTS);
@@ -128,9 +131,10 @@ export default function App() {
       'coupon', 'coupons', 'discount', 'price', 'cost', 'pay', 'paid',
       'balance', 'sparkle cash', 'stiletto', 'chrome', 'drop', 'limited edition',
       'ideas', 'inspiration', 'trending', 'today', 'tomorrow', 'slot',
-      'available', 'naomi', 'refill', 'cash', 'french', 'nailsbysoa',
+      'available', 'gainage', 'gel-x', 'refill', 'cash', 'french', 'nailsbysoa',
       'rendez-vous', 'rdv', 'ongles', 'promo', 'promos', 'réduction',
-      'solde', 'dernier', 'édition limitée', 'tendance', 'créneau', 'dispo'
+      'solde', 'dernier', 'édition limitée', 'tendance', 'créneau', 'dispo',
+      'web3', 'pass', 'wallet', 'badge', 'collectible', 'soulbound', 'vote', 'gdpr', 'rgpd'
     ];
 
     const hasKeyword = keywords.some((k) => t.includes(k));
@@ -616,10 +620,10 @@ export default function App() {
       });
       const data = await res.json();
       if (data.success) {
-        sendVoiceQuery(`Confirmed my appointment on ${slot.date} at ${slot.time} with ${slot.artist}!`);
+        sendVoiceQuery(language === 'fr' ? `Rendez-vous confirmé le ${slot.date} à ${slot.time} !` : `Confirmed my appointment on ${slot.date} at ${slot.time}!`);
       }
     } catch (e) {
-      sendVoiceQuery(`Please confirm my booking on ${slot.date} at ${slot.time} with ${slot.artist}`);
+      sendVoiceQuery(language === 'fr' ? `Merci de confirmer ma réservation le ${slot.date} à ${slot.time}` : `Please confirm my booking on ${slot.date} at ${slot.time}`);
     }
   };
 
@@ -763,13 +767,22 @@ export default function App() {
           </header>
 
           {/* Client VIP Status Pill Bar */}
-          <div className="flex items-center justify-between bg-white/85 border border-[#e3bdc7] rounded-full px-3.5 py-1.5 shadow-xs text-xs font-space select-none">
+          <div
+            onClick={() => setIsWeb3HubOpen(true)}
+            className="flex items-center justify-between bg-white/85 border border-[#e3bdc7] hover:border-[#b40065] rounded-full px-3.5 py-1.5 shadow-xs text-xs font-space select-none cursor-pointer transition-colors group"
+            title="Click to view your Web3 VIP Membership Pass & Digital Badges"
+          >
             <div className="flex items-center space-x-1.5 truncate">
               <span className="text-[#b40065] font-bold">VIP:</span>
               <span className="font-bold text-[#1f1a1d] truncate">
                 {clientProfile?.name || 'Mia Vance'}
               </span>
-              <span className="text-[#764d93] text-[10px] font-semibold">✦ Diamond Starlet</span>
+              <span className="text-[#764d93] text-[10px] font-semibold flex items-center gap-1">
+                <span>✦ Diamond Starlet</span>
+                <span className="bg-[#f3daff] text-[#764d93] text-[9px] px-1.5 py-0.2 rounded-full font-bold group-hover:bg-[#b40065] group-hover:text-white transition-colors">
+                  WEB3 PASS 💎
+                </span>
+              </span>
             </div>
             <div className="flex items-center space-x-1 shrink-0">
               <span className="text-[#8f6e78]">
@@ -778,6 +791,75 @@ export default function App() {
               <span className="font-bold text-[#b40065] bg-[#ffd9e3] px-2 py-0.5 rounded-full text-[11px]">
                 {clientProfile?.sparkleCash ? clientProfile.sparkleCash.toFixed(2) : '15.00'} €
               </span>
+            </div>
+          </div>
+
+          {/* THE SOA DROP Official Campaign Visual Banner */}
+          <div className="relative overflow-hidden rounded-2xl border-2 border-[#b40065]/35 bg-gradient-to-r from-[#ffd9e3]/60 via-white/80 to-[#f3daff]/60 shadow-xs hover:border-[#b40065] transition-all group">
+            <div className="flex flex-col sm:flex-row items-center gap-3 p-2.5 sm:p-3">
+              {/* Campaign Visual Thumbnail / Mini Poster */}
+              <div
+                onClick={() => setIsCampaignModalOpen(true)}
+                className="relative w-full sm:w-36 h-28 sm:h-24 rounded-xl overflow-hidden shrink-0 border border-[#b40065]/40 cursor-pointer shadow-xs group/img"
+                title={language === 'fr' ? 'Cliquer pour voir les détails de la campagne' : 'Click to view campaign details'}
+              >
+                <img
+                  src="/the_soa_drop.jpg"
+                  alt="THE SOA DROP Official Campaign"
+                  className="w-full h-full object-cover object-top transition-transform duration-500 group-hover/img:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-1.5">
+                  <span className="font-syne font-black text-[10px] text-white tracking-wider flex items-center gap-1 drop-shadow-sm">
+                    <span>🔥</span> THE SOA DROP
+                  </span>
+                </div>
+              </div>
+
+              {/* Campaign Text & Call to Action */}
+              <div className="flex-1 min-w-0 text-center sm:text-left">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 mb-1">
+                  <span className="bg-[#b40065] text-white text-[9px] font-space font-black px-2 py-0.5 rounded-full uppercase tracking-wider animate-pulse">
+                    {language === 'fr' ? 'CAMPAGNE OFFICIELLE' : 'OFFICIAL CAMPAIGN'}
+                  </span>
+                  <span className="bg-[#ffd9e3] text-[#8d004e] text-[9px] font-space font-bold px-2 py-0.5 rounded-full">
+                    45 € - 50 €
+                  </span>
+                  <span className="text-[#764d93] text-[9px] font-space font-semibold">
+                    ✦ {language === 'fr' ? '3 places restantes' : '3 slots left'}
+                  </span>
+                </div>
+                <h3 className="font-syne font-black text-xs sm:text-sm text-[#1f1a1d] leading-snug">
+                  THE SOA DROP // {language === 'fr' ? 'Fidélité Web3 & Couture' : 'Web3 Loyalty & Couture'}
+                </h3>
+                <p className="font-jakarta text-[11px] text-[#5b3f48] line-clamp-1 mt-0.5">
+                  {language === 'fr'
+                    ? 'Extensions Gel-X chrome liquide, Pass VIP digital & badges de présence.'
+                    : 'Molten chrome Gel-X, digital VIP wallet pass & attendance badges.'}
+                </p>
+
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 mt-2">
+                  <button
+                    onClick={() => setIsCampaignModalOpen(true)}
+                    className="bg-[#b40065] text-white text-[10px] font-space font-bold px-3 py-1 rounded-full shadow-xs hover:bg-[#e10080] active:scale-95 transition-all cursor-pointer flex items-center gap-1"
+                  >
+                    <span>🔥</span>
+                    <span>{language === 'fr' ? 'Détails de la Campagne' : 'Campaign Details'}</span>
+                  </button>
+                  <button
+                    onClick={() => setIsWeb3HubOpen(true)}
+                    className="bg-gradient-to-r from-[#764d93] via-[#b40065] to-[#dcacfb] text-white text-[10px] font-space font-bold px-2.5 py-1 rounded-full shadow-xs hover:shadow-md active:scale-95 transition-all cursor-pointer flex items-center gap-1"
+                  >
+                    <span>💎</span>
+                    <span>{language === 'fr' ? 'Pass Web3 & Badges' : 'Web3 Pass & Badges'}</span>
+                  </button>
+                  <button
+                    onClick={() => sendVoiceQuery(language === 'fr' ? 'Je veux réserver THE SOA DROP à 45€' : 'I want to book THE SOA DROP for 45€')}
+                    className="bg-white border border-[#b40065]/40 text-[#b40065] text-[10px] font-space font-bold px-2.5 py-1 rounded-full hover:bg-[#ffd9e3]/30 active:scale-95 transition-all cursor-pointer"
+                  >
+                    {language === 'fr' ? 'Réserver (45€)' : 'Book (45€)'}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -826,6 +908,7 @@ export default function App() {
             onBookSlot={handleBookSlot}
             isProcessing={isProcessing}
             language={language}
+            onOpenWeb3Hub={() => setIsWeb3HubOpen(true)}
           />
 
           <div ref={scrollRef} />
@@ -858,6 +941,283 @@ export default function App() {
           </footer>
         </div>
       </div>
+
+      {/* Web3 Loyalty Hub Modal (VIP Pass, Collectibles Vault, Community Vote, GDPR Flow) */}
+      <Web3LoyaltyHub
+        isOpen={isWeb3HubOpen}
+        onClose={() => setIsWeb3HubOpen(false)}
+        clientProfile={clientProfile}
+        language={language}
+        onSelectAction={sendVoiceQuery}
+      />
+
+      {/* Official Campaign Details Modal: THE SOA DROP */}
+      {isCampaignModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl max-h-[92vh] flex flex-col bg-gradient-to-b from-white via-[#fff0f5] to-[#fde8f2] border-2 border-[#b40065] rounded-3xl shadow-2xl overflow-hidden font-jakarta select-none">
+            
+            {/* Holographic Top Bar */}
+            <div className="h-2 w-full bg-gradient-to-r from-[#ff1493] via-[#dcacfb] to-[#79f5fb] animate-pulse" />
+
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-[#ffd9e3] bg-white/85">
+              <div className="flex items-center space-x-2.5">
+                <span className="text-xl">🔥</span>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-syne font-black text-sm sm:text-base text-[#1f1a1d] tracking-wide">
+                      THE SOA DROP // OFFICIAL CAMPAIGN
+                    </h2>
+                    <span className="bg-[#b40065] text-white font-space text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase">
+                      LIMITED EDITION
+                    </span>
+                  </div>
+                  <p className="font-space text-[10px] text-[#764d93] font-medium">
+                    {language === 'fr'
+                      ? 'Détails Officiels de la Campagne • Nail Art Couture & Web3 par Soa'
+                      : 'Official Campaign Details • Couture Nail Art & Web3 by Soa'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsCampaignModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-[#ffd9e3] text-[#b40065] hover:bg-[#b40065] hover:text-white transition-colors flex items-center justify-center font-bold text-sm cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Scrollable Content */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+              
+              {/* Hero Image Section with Editorial Badges */}
+              <div className="relative rounded-2xl overflow-hidden border-2 border-[#b40065]/40 shadow-lg group">
+                <img
+                  src="/the_soa_drop.jpg"
+                  alt="THE SOA DROP Official Campaign Visual"
+                  className="w-full h-52 sm:h-64 object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent flex flex-col justify-end p-4">
+                  <div className="flex flex-wrap items-end justify-between gap-2">
+                    <div>
+                      <span className="bg-[#ffd9e3] text-[#b40065] font-space text-[9px] px-2.5 py-0.5 rounded-full font-extrabold uppercase tracking-wider">
+                        SIGNATURE COUTURE // BY SOA
+                      </span>
+                      <h3 className="font-syne font-black text-white text-lg sm:text-2xl drop-shadow-md mt-1">
+                        THE SOA DROP
+                      </h3>
+                      <p className="font-space text-xs text-pink-200">
+                        {language === 'fr'
+                          ? 'Extensions Gel-X • Chrome Liquide • Piercings d\'Ongles'
+                          : 'Gel-X Extensions • Molten Liquid Chrome • Pierced Charms'}
+                      </p>
+                    </div>
+
+                    <div className="text-right">
+                      <div className="font-syne font-black text-2xl sm:text-3xl text-[#ff66b2] drop-shadow-md">
+                        45 € - 50 €
+                      </div>
+                      <span className="bg-[#b40065] text-white font-space text-[10px] font-bold px-2 py-0.5 rounded-full inline-block mt-0.5">
+                        {language === 'fr' ? 'Plus que 3 créneaux' : 'Only 3 slots left'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 1. What is the Campaign & What is Web3 for NailsbySoa */}
+              <div className="bg-white rounded-2xl p-4 border border-[#ffd9e3] space-y-2 shadow-xs">
+                <div className="flex items-center gap-1.5 text-[#b40065] font-space text-xs font-bold uppercase tracking-wider">
+                  <span>✦</span>
+                  <span>{language === 'fr' ? '1. La Stratégie & La Vision de la Campagne' : '1. Campaign Strategy & Vision'}</span>
+                </div>
+                <p className="font-jakarta text-xs text-[#5b3f48] leading-relaxed">
+                  {language === 'fr'
+                    ? 'Le Web3 chez NailsbySoa n\'est pas une mode spéculative ni un effet d\'annonce. Nous utilisons les technologies décentralisées pour créer une véritable exclusivité, une participation communautaire active et une fidélité client durable et récompensée.'
+                    : 'Web3 at NailsbySoa is not about hype or speculative NFTs. We leverage decentralized digital passes to build true exclusivity, active community co-creation, and lasting customer loyalty.'}
+                </p>
+              </div>
+
+              {/* 2. The Two Complementary Web3 Mechanics */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between font-space text-xs">
+                  <span className="font-bold text-[#b40065] uppercase tracking-wider">
+                    {language === 'fr' ? '2. Les Deux Mécaniques Complémentaires' : '2. The Two Complementary Mechanics'}
+                  </span>
+                  <span className="text-[#764d93] font-semibold text-[11px]">
+                    NailsbySoa Web3 Architecture
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-space text-xs">
+                  {/* Mechanic 1: SOA VIP Pass */}
+                  <div className="bg-white p-3.5 rounded-2xl border-2 border-[#ffd9e3] space-y-2 shadow-xs flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-extrabold text-[#b40065] bg-[#ffd9e3] px-2 py-0.5 rounded-full uppercase">
+                          {language === 'fr' ? 'Mécanique 1' : 'Mechanic 1'}
+                        </span>
+                        <span className="text-base">💳</span>
+                      </div>
+                      <h4 className="font-syne font-black text-sm text-[#1f1a1d] mt-1">
+                        SOA VIP Membership Pass
+                      </h4>
+                      <p className="text-[10px] text-[#764d93] font-medium italic mt-0.5">
+                        {language === 'fr'
+                          ? 'Carte de membre digitale stockée dans le digital wallet de la cliente.'
+                          : 'Digital membership card, stored in the customer\'s digital wallet.'}
+                      </p>
+
+                      <ul className="mt-2 space-y-1 font-jakarta text-[11px] text-[#5b3f48]">
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-[#b40065] font-bold">✓</span>
+                          <span>{language === 'fr' ? 'Accès anticipé 48h aux drops mensuels' : 'Early access to monthly nail drops (48h)'}</span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-[#b40065] font-bold">✓</span>
+                          <span>{language === 'fr' ? 'Réservation prioritaire avec Soa' : 'Priority booking with Soa'}</span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-[#b40065] font-bold">✓</span>
+                          <span>{language === 'fr' ? 'Accès à des designs d\'ongles exclusifs' : 'Access to exclusive nail designs'}</span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-[#b40065] font-bold">✓</span>
+                          <span>{language === 'fr' ? 'Avantages VIP & récompenses de fidélité' : 'VIP benefits and loyalty rewards'}</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-[#ffd9e3]/60 rounded-xl p-2 mt-2 border border-[#b40065]/20 font-space text-[10px] text-[#8d004e]">
+                      <strong>{language === 'fr' ? 'Objectif :' : 'Purpose:'}</strong>{' '}
+                      {language === 'fr'
+                        ? 'Récompenser les clientes fidèles et créer un sentiment d\'exclusivité.'
+                        : 'Reward loyal customers and create a feeling of exclusivity.'}
+                    </div>
+                  </div>
+
+                  {/* Mechanic 2: SOA Digital Collectibles */}
+                  <div className="bg-white p-3.5 rounded-2xl border-2 border-[#ffd9e3] space-y-2 shadow-xs flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-extrabold text-[#764d93] bg-[#f3daff] px-2 py-0.5 rounded-full uppercase">
+                          {language === 'fr' ? 'Mécanique 2' : 'Mechanic 2'}
+                        </span>
+                        <span className="text-base">✨</span>
+                      </div>
+                      <h4 className="font-syne font-black text-sm text-[#1f1a1d] mt-1">
+                        SOA Digital Collectibles
+                      </h4>
+                      <p className="text-[10px] text-[#764d93] font-medium italic mt-0.5">
+                        {language === 'fr'
+                          ? 'Reçu à chaque rendez-vous THE SOA DROP assisté.'
+                          : 'Received every time a customer attends a THE SOA DROP appointment.'}
+                      </p>
+
+                      <div className="mt-2 bg-[#fdf5f8] p-2 rounded-xl border border-pink-200/60 font-space text-[10px] space-y-1">
+                        <div className="flex justify-between items-center text-[#b40065] font-bold">
+                          <span>{language === 'fr' ? '• Drop de Janvier :' : '• January Drop:'}</span>
+                          <span className="bg-[#ffd9e3] px-1.5 py-0.5 rounded text-[9px]">Collectible 01</span>
+                        </div>
+                        <div className="flex justify-between items-center text-[#764d93] font-bold">
+                          <span>{language === 'fr' ? '• Drop de Février :' : '• February Drop:'}</span>
+                          <span className="bg-[#f3daff] px-1.5 py-0.5 rounded text-[9px]">Collectible 02</span>
+                        </div>
+                        <div className="flex justify-between items-center text-[#5b3f48] font-bold">
+                          <span>{language === 'fr' ? '• Drop de Mars :' : '• March Drop:'}</span>
+                          <span className="bg-neutral-200 px-1.5 py-0.5 rounded text-[9px]">Collectible 03</span>
+                        </div>
+                      </div>
+
+                      <p className="font-jakarta text-[11px] text-[#5b3f48] mt-2">
+                        {language === 'fr'
+                          ? 'Collectionner plusieurs badges débloque des récompenses additionnelles (badges soulbound non-transférables pour éviter la spéculation).'
+                          : 'Collecting several badges unlocks additional rewards (soulbound non-transferable badges to avoid speculation).'}
+                      </p>
+                    </div>
+
+                    <div className="bg-[#f3daff]/70 rounded-xl p-2 mt-2 border border-[#764d93]/20 font-space text-[10px] text-[#572e73]">
+                      <strong>{language === 'fr' ? 'Objectif :' : 'Purpose:'}</strong>{' '}
+                      {language === 'fr'
+                        ? 'Encourager les visites répétées et impliquer les clientes dans l\'aventure de la marque.'
+                        : 'Encourage repeat visits and make customers feel involved in the brand\'s journey.'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. Customer Journey Flow (6 steps) */}
+              <div className="bg-white rounded-2xl p-4 border border-[#ffd9e3] space-y-2.5 shadow-xs">
+                <span className="font-space text-xs font-bold text-[#b40065] uppercase tracking-wider block">
+                  {language === 'fr' ? '3. Parcours Client & Conformité RGPD (6 Étapes)' : '3. Customer Journey & GDPR Compliance (6 Steps)'}
+                </span>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 font-space text-[10px]">
+                  <div className="bg-[#fff5f8] p-2 rounded-xl border border-pink-100">
+                    <strong className="text-[#b40065] block">1. Instagram</strong>
+                    <span>{language === 'fr' ? 'Découverte de la collection' : 'Discover the new drop'}</span>
+                  </div>
+                  <div className="bg-[#fff5f8] p-2 rounded-xl border border-pink-100">
+                    <strong className="text-[#b40065] block">2. Inscription</strong>
+                    <span>{language === 'fr' ? 'Rejoint la communauté SOA' : 'Sign up on the platform'}</span>
+                  </div>
+                  <div className="bg-[#fff5f8] p-2 rounded-xl border border-pink-100">
+                    <strong className="text-[#b40065] block">3. Consentement RGPD</strong>
+                    <span>{language === 'fr' ? 'Protection des données privées' : 'Transparent GDPR consent'}</span>
+                  </div>
+                  <div className="bg-[#fff5f8] p-2 rounded-xl border border-pink-100">
+                    <strong className="text-[#764d93] block">4. Déblocage du Pass</strong>
+                    <span>{language === 'fr' ? 'Carte VIP dans digital wallet' : 'Unlock VIP wallet pass'}</span>
+                  </div>
+                  <div className="bg-[#fff5f8] p-2 rounded-xl border border-pink-100">
+                    <strong className="text-[#764d93] block">5. Avantages & Vote</strong>
+                    <span>{language === 'fr' ? 'Réservation & co-création' : 'Early booking & drop voting'}</span>
+                  </div>
+                  <div className="bg-[#fff5f8] p-2 rounded-xl border border-pink-100">
+                    <strong className="text-[#764d93] block">6. Collectible Reçu</strong>
+                    <span>{language === 'fr' ? 'Badge après rendez-vous' : 'Badge received at salon'}</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Modal Footer with Actions */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-2 px-4 sm:px-6 py-3 border-t border-[#ffd9e3] bg-white/95 font-space text-xs">
+              <button
+                onClick={() => {
+                  setIsCampaignModalOpen(false);
+                  sendVoiceQuery(language === 'fr' ? 'Je veux réserver THE SOA DROP à 45€' : 'I want to book THE SOA DROP for 45€');
+                }}
+                className="w-full sm:w-auto bg-gradient-to-r from-[#b40065] via-[#e10080] to-[#764d93] text-white px-5 py-2.5 rounded-full font-bold shadow-md hover:shadow-lg active:scale-95 transition-all cursor-pointer text-center"
+              >
+                {language === 'fr' ? '✦ Réserver THE SOA DROP (45€)' : '✦ Book THE SOA DROP (45€)'}
+              </button>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  onClick={() => {
+                    setIsCampaignModalOpen(false);
+                    setIsWeb3HubOpen(true);
+                  }}
+                  className="flex-1 sm:flex-initial bg-[#f3daff] border border-[#764d93]/40 text-[#764d93] hover:bg-[#b40065] hover:text-white px-4 py-2.5 rounded-full font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <span>💎</span>
+                  <span>{language === 'fr' ? 'Hub Web3 & Pass' : 'Web3 Hub & Pass'}</span>
+                </button>
+
+                <button
+                  onClick={() => setIsCampaignModalOpen(false)}
+                  className="bg-[#ffd9e3] text-[#b40065] hover:bg-[#b40065] hover:text-white px-4 py-2.5 rounded-full font-bold transition-all cursor-pointer"
+                >
+                  {language === 'fr' ? 'Fermer' : 'Close'}
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }
